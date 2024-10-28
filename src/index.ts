@@ -8,7 +8,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const app: Express = express()
-const port: number = 3000
+const port: number = 4000
 app.use(cors({ origin: '*' }))
 app.use(express.json())
 
@@ -68,9 +68,9 @@ app.post('/users', async (req, res: Response): Promise<void> => {
 const mongoUsername = process.env.MONGO_USERNAME
 const mongoPassword = process.env.MONGO_PASSWORD
 const mongoAppName = process.env.MONGO_APP_NAME
-const mongoURI = `mongodb+srv://${mongoUsername}:${mongoPassword}@cluster0.wioncds.mongodb.net/?retryWrites=true&w=majority&appName=${mongoAppName}`
+const uri = `mongodb+srv://${mongoUsername}:${mongoPassword}@cloudmerce.ggxeq.mongodb.net/?retryWrites=true&w=majority&appName=${mongoAppName}`
 
-mongoose.connect(mongoURI)
+mongoose.connect(uri)
     .then(() => console.log('Connected to MongoDB...'))
     .catch(err => console.error('Could not connect to MongoDB...', err))
 
