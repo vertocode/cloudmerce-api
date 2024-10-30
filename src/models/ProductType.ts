@@ -19,4 +19,4 @@ const productTypeSchema = new mongoose.Schema({
     }
 })
 
-export default mongoose.model('Product', productTypeSchema)
+export default mongoose.model('ProductType', productTypeSchema)

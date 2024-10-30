@@ -1,6 +1,7 @@
 import Product from '../models/Product'
 import ProductType from '../models/ProductType'
 import { Document, Types } from 'mongoose'
+import {CustomError} from "../utils/error";
 
 interface ProductTypeData extends Document {
     ecommerceId: string
@@ -20,6 +21,11 @@ interface ProductData extends Document {
 
 // ProductType
 export async function addProductType(data: { ecommerceId: string, name: string }) {
+    const existingProductType = await ProductType.findOne({ name: data.name });
+    if (existingProductType) {
+        throw new CustomError('PRODUCT_TYPE_EXISTS', `Um tipo de produto com o nome '${data.name}' já existe.`);
+    }
+
     return ProductType.create(data)
 }
 
@@ -28,6 +34,13 @@ export async function deleteProductType(productTypeId: Types.ObjectId) {
 }
 
 export async function updateProductType(productTypeId: Types.ObjectId, data: Partial<ProductTypeData>) {
+    if (data.name) {
+        const existingProductType = await ProductType.findOne({ name: data.name, _id: { $ne: productTypeId } });
+        if (existingProductType) {
+            throw new CustomError('PRODUCT_TYPE_EXISTS', `Um tipo de produto com o nome '${data.name}' já existe.`);
+        }
+    }
+
     return ProductType.findByIdAndUpdate(productTypeId, data, { new: true })
 }
 
