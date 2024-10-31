@@ -2,7 +2,15 @@ import type { Express } from 'express'
 import express, { Response } from 'express'
 import cors from 'cors'
 import {auth, checkUserExists, createUser, getUsers} from './services/user'
-import { addProductType, deleteProductType, updateProductType, addProduct, deleteProduct, updateProduct } from './services/product';
+import {
+    addProductType,
+    deleteProductType,
+    updateProductType,
+    addProduct,
+    deleteProduct,
+    updateProduct,
+    getProductsByEcommerceId, getProductTypesByEcommerceId
+} from './services/product';
 import * as mongoose from "mongoose"
 import dotenv from 'dotenv'
 
@@ -113,11 +121,11 @@ app.put('/product-types/:id', async (req, res: Response): Promise<void> => {
 
 app.post('/products', async (req, res: Response): Promise<void> => {
     try {
-        const { ecommerceId, productType, name, price } = req.body;
+        const { ecommerceId, productType, name, price, description = '', image = '' } = req.body;
         if (!ecommerceId || !productType || !name || price === undefined) {
             throw new Error('Invalid body, ecommerceId, productType, name, and price are required.');
         }
-        const response = await addProduct({ ecommerceId, productType, name, price });
+        const response = await addProduct({ ecommerceId, productType, name, price, image, description });
         res.status(201).send(response);
     } catch (error) {
         const errorMessage = `Error adding product: ${error}`;
@@ -152,6 +160,28 @@ app.put('/products/:id', async (req, res: Response): Promise<void> => {
         res.status(200).send(response);
     } catch (error) {
         const errorMessage = `Error updating product: ${error}`;
+        res.status(500).send({ error: errorMessage });
+    }
+});
+
+app.get('/products/ecommerce/:ecommerceId', async (req, res: Response): Promise<void> => {
+    try {
+        const { ecommerceId } = req.params;
+        const response = await getProductsByEcommerceId(ecommerceId);
+        res.status(200).send(response);
+    } catch (error) {
+        const errorMessage = `Error getting products: ${error}`;
+        res.status(500).send({ error: errorMessage });
+    }
+});
+
+app.get('/product-types/ecommerce/:ecommerceId', async (req, res: Response): Promise<void> => {
+    try {
+        const { ecommerceId } = req.params;
+        const response = await getProductTypesByEcommerceId(ecommerceId);
+        res.status(200).send(response);
+    } catch (error) {
+        const errorMessage = `Error getting product types: ${error}`;
         res.status(500).send({ error: errorMessage });
     }
 });

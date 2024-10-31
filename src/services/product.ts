@@ -1,7 +1,8 @@
 import Product from '../models/Product'
 import ProductType from '../models/ProductType'
-import { Document, Types } from 'mongoose'
+import {Document, Types} from 'mongoose'
 import {CustomError} from "../utils/error";
+import {IProduct} from "../types/Product";
 
 interface ProductTypeData extends Document {
     ecommerceId: string
@@ -49,11 +50,15 @@ async function validateProductTypeExists(productType: string): Promise<boolean> 
     return !!existingProductType
 }
 
+export async function getProductTypesByEcommerceId(ecommerceId: string) {
+    return ProductType.find({ecommerceId})
+}
+
 // Product
-export async function addProduct(data: { ecommerceId: string, productType: string, name: string, price: number }) {
-    const isProductTypeValid = await validateProductTypeExists(data.productType);
+export async function addProduct(data: IProduct) {
+    const isProductTypeValid = await validateProductTypeExists(data.productType)
     if (!isProductTypeValid) {
-        throw new Error('ProductType does not exist.');
+        throw new Error('ProductType does not exist.')
     }
     return Product.create(data)
 }
@@ -70,4 +75,8 @@ export async function updateProduct(productId: Types.ObjectId, data: Partial<Pro
         }
     }
     return Product.findByIdAndUpdate(productId, data, { new: true })
+}
+
+export async function getProductsByEcommerceId(ecommerceId: string) {
+    return Product.find({ecommerceId})
 }
