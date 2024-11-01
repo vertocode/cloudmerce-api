@@ -9,10 +9,11 @@ import {
     addProduct,
     deleteProduct,
     updateProduct,
-    getProductsByEcommerceId, getProductTypesByEcommerceId
+    getProductsByEcommerceId, getProductTypesByEcommerceId, getProductsByFilters
 } from './services/product';
 import * as mongoose from "mongoose"
 import dotenv from 'dotenv'
+import {IProductFilters} from "./types/Product";
 
 dotenv.config()
 
@@ -166,9 +167,19 @@ app.put('/products/:id', async (req, res: Response): Promise<void> => {
 
 app.get('/products/ecommerce/:ecommerceId', async (req, res: Response): Promise<void> => {
     try {
-        const { ecommerceId } = req.params;
-        const response = await getProductsByEcommerceId(ecommerceId);
-        res.status(200).send(response);
+        const { ecommerceId } = req.params || {}
+        const { productType = null, search = null } = req.query || {}
+        let response
+        if (productType || search) {
+            response = await getProductsByFilters({
+                ecommerceId,
+                productType: productType as string,
+                search: search as string
+            })
+        } else {
+            response = await getProductsByEcommerceId(ecommerceId)
+        }
+        res.status(200).send(response)
     } catch (error) {
         const errorMessage = `Error getting products: ${error}`;
         res.status(500).send({ error: errorMessage });

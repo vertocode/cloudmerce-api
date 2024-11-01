@@ -2,7 +2,7 @@ import Product from '../models/Product'
 import ProductType from '../models/ProductType'
 import {Document, Types} from 'mongoose'
 import {CustomError} from "../utils/error";
-import {IProduct} from "../types/Product";
+import {IProduct, IProductFilters} from "../types/Product";
 
 interface ProductTypeData extends Document {
     ecommerceId: string
@@ -79,4 +79,16 @@ export async function updateProduct(productId: Types.ObjectId, data: Partial<Pro
 
 export async function getProductsByEcommerceId(ecommerceId: string) {
     return Product.find({ecommerceId})
+}
+
+export async function getProductsByFilters(filters: IProductFilters) {
+    const { ecommerceId, productType, search } = filters
+    const query: any = { ecommerceId }
+    if (productType) {
+        query.productType = productType
+    }
+    if (search) {
+        query.name = { $regex: search, $options: 'i' }
+    }
+    return Product.find(query)
 }

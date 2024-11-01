@@ -6,3 +6,9 @@ export interface IProduct {
     description?: string
     image?: string
 }
+
+export interface  IProductFilters {
+    ecommerceId: string
+    productType?: string | null
+    search?: string | null
+}
