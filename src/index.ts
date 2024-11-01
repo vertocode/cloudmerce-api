@@ -9,11 +9,12 @@ import {
     addProduct,
     deleteProduct,
     updateProduct,
-    getProductsByEcommerceId, getProductTypesByEcommerceId, getProductsByFilters
+    getProductsByEcommerceId,
+    getProductTypesByEcommerceId,
+    getProductsByFilters
 } from './services/product';
 import * as mongoose from "mongoose"
 import dotenv from 'dotenv'
-import {IProductFilters} from "./types/Product";
 
 dotenv.config()
 
@@ -122,9 +123,9 @@ app.put('/product-types/:id', async (req, res: Response): Promise<void> => {
 
 app.post('/products', async (req, res: Response): Promise<void> => {
     try {
-        const { ecommerceId, productType, name, price, description = '', image = '' } = req.body;
-        if (!ecommerceId || !productType || !name || price === undefined) {
-            throw new Error('Invalid body, ecommerceId, productType, name, and price are required.');
+        const { ecommerceId, productType, name, price, description = '', image = [] } = req.body;
+        if (!ecommerceId || !productType || !name || price === undefined || image.length === 0) {
+            throw new Error('Invalid body, ecommerceId, productType, name, image, and price are required.');
         }
         const response = await addProduct({ ecommerceId, productType, name, price, image, description });
         res.status(201).send(response);
