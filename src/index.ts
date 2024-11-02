@@ -24,8 +24,30 @@ app.use(cors({ origin: '*' }))
 app.options('*', cors())
 app.use(express.json())
 
+let isConnected = false;
+let connectionError = ''
+const mongoUsername = process.env.MONGO_USERNAME
+const mongoPassword = process.env.MONGO_PASSWORD
+const mongoAppName = process.env.MONGO_APP_NAME
+const uri = `mongodb+srv://${mongoUsername}:${mongoPassword}@cloudmerce.ggxeq.mongodb.net/?retryWrites=true&w=majority&appName=${mongoAppName}`
+
+mongoose.connect(uri)
+    .then(() => {
+        console.log('Connected to MongoDB...')
+        isConnected = true
+    })
+    .catch(err => {
+        console.error('Could not connect to MongoDB...', err)
+        isConnected = false
+        connectionError = err
+    })
+
 app.get('/', (_, res: Response): void => {
-    res.send({ status: 'OK' })
+    if (isConnected) {
+        res.send({ status: 'OK:Connected with MongoDB' });
+    } else {
+        res.status(500).send({ error: `Failed to connect to MongoDB: ${connectionError}` });
+    }
 })
 
 app.get('/auth/login', async (req, res: Response): Promise<void> => {
@@ -198,15 +220,6 @@ app.get('/product-types/ecommerce/:ecommerceId', async (req, res: Response): Pro
         res.status(500).send({ error: errorMessage });
     }
 });
-
-const mongoUsername = process.env.MONGO_USERNAME
-const mongoPassword = process.env.MONGO_PASSWORD
-const mongoAppName = process.env.MONGO_APP_NAME
-const uri = `mongodb+srv://${mongoUsername}:${mongoPassword}@cloudmerce.ggxeq.mongodb.net/?retryWrites=true&w=majority&appName=${mongoAppName}`
-
-mongoose.connect(uri)
-    .then(() => console.log('Connected to MongoDB...'))
-    .catch(err => console.error('Could not connect to MongoDB...', err))
 
 app.listen(port, (): void => {
     console.log(`Cloudmerce API running on port: ${port}`)
