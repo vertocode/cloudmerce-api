@@ -44,6 +44,7 @@ app.get('/', async (_, res: Response): Promise<void> => {
     if (isConnected) {
         res.send({ status: 'OK: Connected with MongoDB' })
     } else {
+        console.log(`Connections: ${JSON.stringify(mongoose.connections)}`)
         res.status(500).send({ error: 'API not connected with database', code: 'db_not_connected' })
     }
 })
