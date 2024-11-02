@@ -26,12 +26,13 @@ export async function auth(data: AuthParams): Promise<UserType | { errorMessage:
     }
     const response = await User.find(filters)
     if (response.length) {
-        const { _id, name, email, password, createdAt } = response.at(0) as unknown as UserType
+        const { _id, name, email, password, createdAt, role = 'user' } = response.at(0) as unknown as UserType
         return {
             _id,
             name,
             email,
             password,
+            role,
             createdAt,
             activeToken: generateToken(),
             activeTokenExpires: new Date(Date.now() + 86400000)
