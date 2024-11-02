@@ -38,14 +38,12 @@ mongoose.connect(uri)
         console.error('Could not connect to MongoDB...', err);
     });
 
-app.get('/', async (_, res: Response): Promise<void> => {
+app.get('/', (_, res: Response): void => {
     const isConnected = mongoose.connections.every(connection => connection.readyState === 1)
 
     if (isConnected) {
         res.send({ status: 'OK: Connected with MongoDB' })
     } else {
-        console.log(`Config ${mongoUsername} | ${mongoPassword} | ${mongoAppName}`)
-        console.log(`Connections: ${mongoose?.connections.map(connection => JSON.stringify(connection))}`)
         res.status(500).send({ error: 'API not connected with database', code: 'db_not_connected' })
     }
 })
