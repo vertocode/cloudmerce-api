@@ -46,7 +46,8 @@ app.get('/', (_, res: Response): void => {
     if (isConnected) {
         res.send({ status: 'OK:Connected with MongoDB' });
     } else {
-        res.status(500).send({ error: `Failed to connect to MongoDB: ${connectionError}` });
+        console.error('CONNECTION ERROR:', connectionError)
+        res.status(500).send({ error: `Failed to connect to MongoDB`, code: 'mongo_db_failed_connection' });
     }
 })
 
