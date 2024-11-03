@@ -11,7 +11,7 @@ import {
     updateProduct,
     getProductsByEcommerceId,
     getProductTypesByEcommerceId,
-    getProductsByFilters
+    getProductsByFilters, updateProductTypes
 } from './services/product';
 import * as mongoose from "mongoose"
 import dotenv from 'dotenv'
@@ -112,36 +112,28 @@ app.post('/product-types', async (req, res: Response): Promise<void> => {
     }
 });
 
-app.delete('/product-types/:id', async (req, res: Response): Promise<void> => {
+app.put('/product-types/multiple-update', async (req, res: Response): Promise<void> => {
     try {
-        const { id } = req.params;
-        const response = await deleteProductType(new mongoose.Types.ObjectId(id));
-        if (!response) {
-            res.status(404).send({ error: 'ProductType not found.' });
-            return;
+        const { productTypes } = req.body;
+        if (!productTypes || !Array.isArray(productTypes)) {
+            throw new Error('Invalid body, productTypes is required and must be an array.');
         }
-        res.status(200).send({ message: 'ProductType deleted successfully.' });
-    } catch (error) {
-        const errorMessage = `Error deleting product type: ${error}`;
-        res.status(500).send({ error: errorMessage });
-    }
-});
-
-app.put('/product-types/:id', async (req, res: Response): Promise<void> => {
-    try {
-        const { id } = req.params;
-        const data = req.body;
-        const response = await updateProductType(new mongoose.Types.ObjectId(id), data);
-        if (!response) {
-            res.status(404).send({ error: 'ProductType not found.' });
-            return;
-        }
+        const response = await updateProductTypes({
+            productTypes: productTypes.map((productType: any) => {
+                return {
+                    action: productType?.action,
+                    id: productType.id ? new mongoose.Types.ObjectId(productType.id) : undefined,
+                    name: productType?.name,
+                    ecommerceId: productType?.ecommerceId
+                }
+            })
+        });
         res.status(200).send(response);
     } catch (error) {
-        const errorMessage = `Error updating product type: ${error}`;
+        const errorMessage = `Error updating the product types: ${error}`;
         res.status(500).send({ error: errorMessage });
     }
-});
+})
 
 app.post('/products', async (req, res: Response): Promise<void> => {
     try {

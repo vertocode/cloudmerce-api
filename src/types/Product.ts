@@ -1,3 +1,5 @@
+import {Types} from "mongoose";
+
 export interface IProduct {
     ecommerceId: string
     name: string
@@ -11,4 +13,13 @@ export interface  IProductFilters {
     ecommerceId: string
     productType?: string | null
     search?: string | null
+}
+
+export interface UpdateProductTypesParams {
+    productTypes: {
+        action: 'add' | 'update' | 'delete'
+        id?: Types.ObjectId // required for update, and delete
+        name?: string // required for add, and update
+        ecommerceId: number // required for all
+    }[]
 }

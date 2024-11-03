@@ -2,7 +2,7 @@ import Product from '../models/Product'
 import ProductType from '../models/ProductType'
 import {Document, Types} from 'mongoose'
 import {CustomError} from "../utils/error";
-import {IProduct, IProductFilters} from "../types/Product";
+import {IProduct, IProductFilters, UpdateProductTypesParams} from "../types/Product";
 
 interface ProductTypeData extends Document {
     ecommerceId: string
@@ -21,7 +21,7 @@ interface ProductData extends Document {
 }
 
 // ProductType
-export async function addProductType(data: { ecommerceId: string, name: string }) {
+export async function addProductType(data: { ecommerceId: number, name: string }) {
     const existingProductType = await ProductType.findOne({ name: data.name });
     if (existingProductType) {
         throw new CustomError('PRODUCT_TYPE_EXISTS', `Um tipo de produto com o nome '${data.name}' já existe.`);
@@ -30,19 +30,45 @@ export async function addProductType(data: { ecommerceId: string, name: string }
     return ProductType.create(data)
 }
 
-export async function deleteProductType(productTypeId: Types.ObjectId) {
-    return ProductType.findByIdAndDelete(productTypeId)
+export async function deleteProductType(productTypeId: Types.ObjectId, ecommerceId: number) {
+    return ProductType.findByIdAndDelete(productTypeId, { ecommerceId })
+    // TODO: Delete all products with the product type
 }
 
-export async function updateProductType(productTypeId: Types.ObjectId, data: Partial<ProductTypeData>) {
+export async function updateProductType(productTypeId: Types.ObjectId, ecommerceId: number, data: Partial<ProductTypeData>) {
     if (data.name) {
-        const existingProductType = await ProductType.findOne({ name: data.name, _id: { $ne: productTypeId } });
+        const existingProductType = await ProductType.findOne({ name: data.name, ecommerceId, _id: { $ne: productTypeId } });
         if (existingProductType) {
             throw new CustomError('PRODUCT_TYPE_EXISTS', `Um tipo de produto com o nome '${data.name}' já existe.`);
         }
     }
+    // TODO: Update all products with the new product type
 
     return ProductType.findByIdAndUpdate(productTypeId, data, { new: true })
+}
+
+export async function updateProductTypes({ productTypes }: UpdateProductTypesParams) {
+    return Promise.all(productTypes.map(async (productType) => {
+        switch (productType.action) {
+            case 'add':
+                if (!productType.name || !productType.ecommerceId) {
+                    throw new Error('name and ecommerceId are required for add action.')
+                }
+                return addProductType({ ecommerceId: productType.ecommerceId, name: productType.name! })
+            case 'update':
+                if (!productType.name || !productType.id || !productType.ecommerceId) {
+                    throw new Error('name and id is required for update action.')
+                }
+                return updateProductType(productType.id, productType.ecommerceId, { name: productType.name! })
+            case 'delete':
+                if (!productType.id || !productType.ecommerceId) {
+                    throw new Error('id is required for delete action.')
+                }
+                return deleteProductType(productType.id, productType.ecommerceId)
+            default:
+                throw new Error(`Invalid action "${productType?.action} for product type: ${productType?.name}".`)
+        }
+    }))
 }
 
 async function validateProductTypeExists(productType: string): Promise<boolean> {
