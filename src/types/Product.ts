@@ -6,7 +6,11 @@ export interface IProduct {
     price: number
     productType: string
     description?: string
-    image?: string
+    image: string[]
+    fields: Array<{
+        label: string
+        type: 'text' | 'number' | 'options'
+    }>
 }
 
 export interface  IProductFilters {

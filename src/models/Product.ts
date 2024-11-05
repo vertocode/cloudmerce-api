@@ -25,6 +25,23 @@ const productSchema = new mongoose.Schema({
       type: Number,
       required: true
     },
+    fields: [
+        {
+            label: {
+                type: String,
+                required: true
+            },
+            type: {
+                type: String,
+                enum: ['text', 'number', 'options'],
+                required: true
+            },
+            options: {
+                type: [String],
+                default: []
+            }
+        }
+    ],
     createdAt: {
       type: Date,
       default: Date.now

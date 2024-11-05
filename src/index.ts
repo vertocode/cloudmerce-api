@@ -137,11 +137,11 @@ app.put('/product-types/multiple-update', async (req, res: Response): Promise<vo
 
 app.post('/products', async (req, res: Response): Promise<void> => {
     try {
-        const { ecommerceId, productType, name, price, description = '', image = [] } = req.body;
+        const { ecommerceId, productType, name, price, description = '', image = [], fields = [] } = req.body;
         if (!ecommerceId || !productType || !name || price === undefined || image.length === 0) {
             throw new Error('Invalid body, ecommerceId, productType, name, image, and price are required.');
         }
-        const response = await addProduct({ ecommerceId, productType, name, price, image, description });
+        const response = await addProduct({ ecommerceId, productType, name, price, image, description, fields });
         res.status(201).send(response);
     } catch (error) {
         const errorMessage = `Error adding product: ${error}`;

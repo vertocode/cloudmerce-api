@@ -16,6 +16,11 @@ interface ProductData extends Document {
     productType: string
     name: string
     price: number
+    fields: {
+      label: string
+      type: 'text' | 'number' | 'options'
+      options?: string[]
+    }[]
     createdAt?: Date
     updatedAt?: Date
 }
