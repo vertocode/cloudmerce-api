@@ -81,3 +81,17 @@ export const addItemToCart = async ({ cartId, productId, quantity, fields, ecomm
 
     return cart
 }
+
+interface IGetCart {
+    cartId: Types.ObjectId
+    ecommerceId: string
+}
+
+export const getCart = async ({ cartId, ecommerceId }: IGetCart) => {
+    const cart = await Cart.findById({ _id: cartId, ecommerceId }).populate('items.productId')
+    if (!cart) {
+        throw new Error('Carrinho não encontrado.')
+    }
+
+    return cart
+}

@@ -15,7 +15,8 @@ import {
 } from './services/product';
 import * as mongoose from "mongoose"
 import dotenv from 'dotenv'
-import {addItemToCart} from "./services/cart";
+import {addItemToCart, getCart} from "./services/cart";
+import {Types} from "mongoose";
 
 dotenv.config()
 
@@ -212,6 +213,24 @@ app.get('/product-types/ecommerce/:ecommerceId', async (req, res: Response): Pro
         res.status(500).send({ error: errorMessage });
     }
 });
+
+app.get('/get-cart/:ecommerceId', async (req, res: Response): Promise<void> => {
+  try {
+      const { ecommerceId } = req.params
+      const { cartId  } = req.query
+      if (!cartId) {
+            throw new Error('Invalid body, cartId is required.')
+      }
+      const response = await getCart({ cartId: cartId as unknown as Types.ObjectId, ecommerceId })
+      if (!response._id) {
+          throw new Error('Fail to get _id in the response.')
+      }
+      res.status(200).send(response)
+  } catch (error) {
+      const errorMessage = `Error getting cart: ${error}`
+      res.status(500).send({error: errorMessage})
+  }
+})
 
 app.put('/add-cart-item/:ecommerceId', async (req, res: Response): Promise<void> => {
   try {
