@@ -2,11 +2,9 @@ import Cart from '../models/Cart'
 import {Types} from "mongoose";
 import Product from "../models/Product";
 
-export const createCart = async (ecommerceId: string, productType: string, userId: Types.ObjectId) => {
+export const createCart = async (ecommerceId: string) => {
     const newCart = new Cart({
         ecommerceId,
-        productType,
-        userId,
         items: [],
     })
 
@@ -17,14 +15,18 @@ export const createCart = async (ecommerceId: string, productType: string, userI
 interface IAddItemToCart {
     cartId: Types.ObjectId | null
     productId: Types.ObjectId
+    fields: {
+      fieldLabel: string
+      value: string
+    }[]
     quantity: number
     ecommerceId: string
 }
 
-export const addItemToCart = async ({ cartId, productId, quantity, ecommerceId }: IAddItemToCart) => {
+export const addItemToCart = async ({ cartId, productId, quantity, fields, ecommerceId }: IAddItemToCart) => {
     let newCartId = cartId
     if (!newCartId) {
-        const newCart = await createCart('ecommerceId', 'productType', new Types.ObjectId())
+        const newCart = await createCart(ecommerceId)
         newCartId = newCart._id
     }
 
@@ -34,21 +36,43 @@ export const addItemToCart = async ({ cartId, productId, quantity, ecommerceId }
         throw new Error('Carrinho não encontrado.')
     }
 
-    const existingItem = cart.items.find(item => item.productId?.toString() === productId.toString())
+    const existingItem = cart.items.find(item => {
+        const hasTheSameId = item.productId?.toString() === productId.toString()
+        const hasTheSameFields = item.fieldValues?.every(field => {
+            const newField = fields.find(f => f.fieldLabel === field.fieldLabel)
+            return newField?.value === field?.value
+        })
+
+        return hasTheSameId && hasTheSameFields
+    })
 
     const product = await Product.findById(productId)
     if (!product) {
         throw new Error('Produto não encontrado.');
     }
 
-    if (existingItem) {
+    const handleIncreaseQuantity = () => {
+        if (!existingItem) return
+
         existingItem.quantity += quantity
-    } else {
+        if (fields.length) {
+            existingItem.fieldValues = fields as any
+        }
+    }
+
+    const handleNewItem = () => {
         cart.items.push({
             productId: productId,
             quantity,
-            price: product.price
-        });
+            price: product.price,
+            fieldValues: fields
+        })
+    }
+
+    if (existingItem) {
+        handleIncreaseQuantity()
+    } else {
+        handleNewItem()
     }
 
     cart.updatedAt = new Date()

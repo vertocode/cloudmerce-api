@@ -216,8 +216,8 @@ app.get('/product-types/ecommerce/:ecommerceId', async (req, res: Response): Pro
 app.put('/add-cart-item/:ecommerceId', async (req, res: Response): Promise<void> => {
   try {
       const { ecommerceId } = req.params
-      const { cartId, productId, quantity } = req.body
-      const response = await addItemToCart({ cartId, productId, quantity, ecommerceId })
+      const { cartId, productId, quantity, fields = [] } = req.body
+      const response = await addItemToCart({ cartId, productId, quantity, ecommerceId, fields })
       res.status(200).send(response)
   }  catch (error) {
       const errorMessage = `Error adding item to cart: ${error}`

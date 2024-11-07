@@ -11,6 +11,20 @@ export const cartSchema = new mongoose.Schema({
             ref: 'Product',
             required: true
         },
+        fieldValues: {
+            type: [{
+                fieldLabel: {
+                    type: String,
+                    required: true
+                },
+                value: {
+                    type: String,
+                    required: true
+                }
+            }],
+            required: false,
+            default: []
+        },
         quantity: {
             type: Number,
             required: true,
