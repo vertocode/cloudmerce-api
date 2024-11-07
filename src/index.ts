@@ -15,6 +15,7 @@ import {
 } from './services/product';
 import * as mongoose from "mongoose"
 import dotenv from 'dotenv'
+import {addItemToCart} from "./services/cart";
 
 dotenv.config()
 
@@ -211,6 +212,18 @@ app.get('/product-types/ecommerce/:ecommerceId', async (req, res: Response): Pro
         res.status(500).send({ error: errorMessage });
     }
 });
+
+app.put('/add-cart-item/:ecommerceId', async (req, res: Response): Promise<void> => {
+  try {
+      const { ecommerceId } = req.params
+      const { cartId, productId, quantity } = req.body
+      const response = await addItemToCart({ cartId, productId, quantity, ecommerceId })
+      res.status(200).send(response)
+  }  catch (error) {
+      const errorMessage = `Error adding item to cart: ${error}`
+      res.status(500).send({ error: errorMessage })
+    }
+})
 
 app.listen(port, (): void => {
     console.log(`Cloudmerce API running on port: ${port}`)

@@ -105,7 +105,10 @@ export async function updateProduct(productId: Types.ObjectId, data: Partial<Pro
             throw new Error('ProductType does not exist.');
         }
     }
-    return Product.findByIdAndUpdate(productId, data, { new: true })
+    return Product.findByIdAndUpdate(productId, {
+        ...data,
+        updatedAt: new Date()
+    }, { new: true })
 }
 
 export async function getProductsByEcommerceId(ecommerceId: string) {
