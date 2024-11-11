@@ -12,39 +12,45 @@ export const createCart = async (ecommerceId: string) => {
     return newCart
 }
 
-interface IAddItemToCart {
-    cartId: Types.ObjectId | null
-    productId: Types.ObjectId
-    fields: {
-      fieldLabel: string
-      value: string
-    }[]
-    quantity: number
-    ecommerceId: string
+interface Field {
+    fieldLabel: string
+    value: string
 }
 
-export const addItemToCart = async ({ cartId, productId, quantity, fields, ecommerceId }: IAddItemToCart) => {
-    let newCartId = cartId
-    if (!newCartId) {
-        const newCart = await createCart(ecommerceId)
-        newCartId = newCart._id
-    }
-
-    const cart = await Cart.findById(newCartId)
-
-    if (!cart) {
-        throw new Error('Carrinho não encontrado.')
-    }
-
-    const existingItem = cart.items.find(item => {
+const getExistingItem = (cart: any, productId: Types.ObjectId, fields: Field[]) => {
+    return cart.items.find((item: any) => {
         const hasTheSameId = item.productId?.toString() === productId.toString()
-        const hasTheSameFields = item.fieldValues?.every(field => {
+        const hasTheSameFields = item.fieldValues?.every((field: any) => {
             const newField = fields.find(f => f.fieldLabel === field.fieldLabel)
             return newField?.value === field?.value
         })
 
         return hasTheSameId && hasTheSameFields
     })
+}
+
+interface IItemToCart {
+    cartId: Types.ObjectId | null
+    productId: Types.ObjectId
+    fields: Field[]
+    quantity: number
+    ecommerceId: string
+}
+
+export const addItemToCart = async ({ cartId, productId, quantity, fields, ecommerceId }: IItemToCart) => {
+    let newCartId = cartId
+    if (!newCartId) {
+        const newCart = await createCart(ecommerceId)
+        newCartId = newCart._id
+    }
+
+    const cart = await Cart.findById({ _id: newCartId, ecommerceId })
+
+    if (!cart) {
+        throw new Error('Carrinho não encontrado.')
+    }
+
+    const existingItem = getExistingItem(cart, productId, fields)
 
     const product = await Product.findById(productId)
     if (!product) {
@@ -73,6 +79,33 @@ export const addItemToCart = async ({ cartId, productId, quantity, fields, ecomm
         handleIncreaseQuantity()
     } else {
         handleNewItem()
+    }
+
+    cart.updatedAt = new Date()
+
+    await cart.save()
+
+    return cart
+}
+
+export const changeQuantity = async ({ cartId, productId, quantity, fields, ecommerceId }: IItemToCart) => {
+    const cart = await Cart.findOne({ _id: cartId, ecommerceId })
+
+    if (!cart) {
+        throw new Error(`Cart not found with cartId: ${cartId} (ecommerceId: ${ecommerceId}).`)
+    }
+
+    const existingItem = getExistingItem(cart, productId, fields)
+
+    if (!existingItem) {
+        throw new Error(`Item not found in cart with productId: ${productId}.`)
+    }
+
+    if (quantity === 0) {
+        // @ts-ignore
+        cart.items = cart.items.filter(item => item !== existingItem)
+    } else {
+        existingItem.quantity = quantity
     }
 
     cart.updatedAt = new Date()

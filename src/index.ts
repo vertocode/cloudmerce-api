@@ -15,7 +15,7 @@ import {
 } from './services/product';
 import * as mongoose from "mongoose"
 import dotenv from 'dotenv'
-import {addItemToCart, getCart} from "./services/cart";
+import {addItemToCart, changeQuantity, getCart} from "./services/cart";
 import {Types} from "mongoose";
 
 dotenv.config()
@@ -241,6 +241,18 @@ app.put('/add-cart-item/:ecommerceId', async (req, res: Response): Promise<void>
   }  catch (error) {
       const errorMessage = `Error adding item to cart: ${error}`
       res.status(500).send({ error: errorMessage })
+    }
+})
+
+app.put('/change-cart-item-quantity/:ecommerceId', async (req, res: Response): Promise<void> => {
+    try {
+        const { ecommerceId } = req.params
+        const { cartId, productId, quantity, fields = [] } = req.body
+        const response = await changeQuantity({ cartId, productId, quantity, ecommerceId, fields })
+        res.status(200).send(response)
+    } catch (error) {
+        const errorMessage = `Error changing item quantity in cart: ${error}`
+        res.status(500).send({ error: errorMessage })
     }
 })
 
