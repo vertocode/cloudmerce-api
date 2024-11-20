@@ -5,6 +5,10 @@ export const cartSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    status: {
+      type: String,
+      default: 'active'
+    },
     items: [{
         productId: {
             type: mongoose.Schema.Types.ObjectId,

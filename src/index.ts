@@ -15,7 +15,7 @@ import {
 } from './services/product';
 import * as mongoose from "mongoose"
 import dotenv from 'dotenv'
-import {addItemToCart, changeQuantity, getCart} from "./services/cart";
+import {addItemToCart, changeQuantity, createOrder, getCart} from "./services/cart";
 import {Types} from "mongoose";
 
 dotenv.config()
@@ -253,6 +253,24 @@ app.put('/change-cart-item-quantity/:ecommerceId', async (req, res: Response): P
     } catch (error) {
         const errorMessage = `Error changing item quantity in cart: ${error}`
         res.status(500).send({ error: errorMessage })
+    }
+})
+
+app.post('/order/:ecommerceId', async (req, res: Response): Promise<void> => {
+    try {
+        const { ecommerceId } = req.params
+        const { cartId, userId, paymentMethod, cardDetails } = req.body
+        const response = await createOrder({
+            cartId,
+            userId,
+            ecommerceId,
+            paymentMethod,
+            cardDetails
+        })
+        res.status(200).send({ message: 'Order created successfully.' })
+    } catch (err) {
+        console.error(err)
+        res.status(500).send({ error: 'Error creating order' })
     }
 })
 
