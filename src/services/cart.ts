@@ -2,6 +2,10 @@ import Cart from '../models/Cart'
 import {Types} from "mongoose";
 import Product from "../models/Product";
 import Stripe from 'stripe'
+import dotenv from 'dotenv'
+import Order from "../models/Order";
+
+dotenv.config()
 
 const apiKey = process.env.STRIPE_API_KEY || ''
 if (!apiKey) {
@@ -140,81 +144,38 @@ interface ICreateOrder {
     cartId: Types.ObjectId;
     userId: Types.ObjectId;
     ecommerceId: string;
-    paymentMethod: 'pix' | 'card' | 'pm_card_visa';
-    cardDetails?: {
-        number: string;
-        expMonth: number;
-        expYear: number;
-        cvc: string;
-    };
+    paymentIntentId: string;
 }
 
 export const createOrder = async ({
-                                      cartId,
-                                      userId,
-                                      ecommerceId,
-                                      paymentMethod,
-                                      cardDetails
-                                  }: ICreateOrder) => {
-    // 1. Retrieve the cart
+  cartId,
+  userId,
+  ecommerceId,
+  paymentIntentId
+}: ICreateOrder) => {
     const cart = await Cart.findById({ _id: cartId, ecommerceId }).populate('items.productId')
     if (!cart) {
-        throw new Error('Cart not found')
+        throw new Error('Carrinho não encontrado.')
     }
 
-    // Calculate the total amount of the cart
-    const amount = cart.items.reduce((total, item: any) => total + item.quantity * item.price, 0) * 100 // In cents (BRL)
-
-    // 2. Define the payment method
-    if (paymentMethod === 'card' || paymentMethod === 'pm_card_visa') {
-        // Check if card details were provided
-        if (!cardDetails) {
-            throw new Error('Card details are required for card payments')
-        }
-
-        // Create a payment method with card details
-        const paymentMethodObj = await stripe.paymentMethods.create({
-            type: 'card',
-            payment_method: paymentMethod,
-            card: {
-                number: cardDetails.number,
-                exp_month: cardDetails.expMonth,
-                exp_year: cardDetails.expYear,
-                cvc: cardDetails.cvc,
-            },
-        })
-
-        // Confirm the payment intent with the payment method
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount: 50, // TODO: Change to amount
-            currency: 'brl',
-            payment_method: paymentMethodObj.id,
-            confirm: true,
-        })
-
-        console.log('Card payment confirmed:', paymentIntent)
-        return {
-            status: 'success',
-            paymentIntent,
-        }
-    } else if (paymentMethod === 'pix') {
-        // Create a payment intent for Pix
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount: 50, // TODO: Change to amount
-            currency: 'brl',
-            payment_method_types: ['pix'],
-        })
-
-        console.log('Pix payment created:', paymentIntent)
-
-        // Return the QR Code and Pix code
-        return {
-            status: 'pending',
-            // pixQrCode: paymentIntent.next_action.pix_display_qr_code.url,
-            // pixCopyPaste: paymentIntent.next_action.pix_display_qr_code.text,
-            clientSecret: paymentIntent.client_secret,
-        }
-    } else {
-        throw new Error('Invalid payment method')
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+    if (paymentIntent.status !== 'succeeded') {
+        throw new Error('O pagamento não foi concluído com sucesso.')
     }
+
+    const newOrder = new Order({
+        userId,
+        ecommerceId,
+        items: cart.items,
+        totalAmount: paymentIntent.amount_received,
+        paymentMethod: 'card',
+        paymentIntentId,
+        status: 'paid'
+    })
+
+    await newOrder.save()
+
+    await Cart.findByIdAndDelete(cartId)
+
+    return newOrder
 }

@@ -258,21 +258,24 @@ app.put('/change-cart-item-quantity/:ecommerceId', async (req, res: Response): P
 
 app.post('/order/:ecommerceId', async (req, res: Response): Promise<void> => {
     try {
-        const { ecommerceId } = req.params
-        const { cartId, userId, paymentMethod, cardDetails } = req.body
+        const { ecommerceId } = req.params;
+        const { cartId, userId, paymentIntentId, elements } = req.body;
+
+        console.log('req.body >>>', req.body)
+
         const response = await createOrder({
             cartId,
             userId,
             ecommerceId,
-            paymentMethod,
-            cardDetails
-        })
-        res.status(200).send({ message: 'Order created successfully.' })
+            paymentIntentId
+        });
+
+        res.status(200).send({ message: 'Pedido criado com sucesso.', code: 'success', order: response });
     } catch (err) {
-        console.error(err)
-        res.status(500).send({ error: 'Error creating order' })
+        console.error(err);
+        res.status(500).send({ error: 'Erro ao criar o pedido.', code: 'error' });
     }
-})
+});
 
 app.listen(port, (): void => {
     console.log(`Cloudmerce API running on port: ${port}`)
