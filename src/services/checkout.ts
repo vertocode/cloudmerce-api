@@ -23,5 +23,7 @@ export const setUserData = async ({ userData, cartId }: SetUserDataParams) => {
         await updateUser(userData?._id as Types.ObjectId, userData)
     }
 
-    return setUserId(cartId, userData?._id as Types.ObjectId)
+    await setUserId(cartId, userData?._id as Types.ObjectId)
+
+    return userData
 }

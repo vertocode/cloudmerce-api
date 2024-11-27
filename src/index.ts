@@ -266,6 +266,8 @@ app.post('/checkout/user/:ecommerceId', async (req, res: Response): Promise<void
             userData
         })
 
+        console.log('[/checkout/user]: User registered in cart with success.')
+
         res.status(200).send(response)
     } catch (e) {
         console.error(e)

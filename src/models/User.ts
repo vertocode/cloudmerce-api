@@ -26,12 +26,16 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    cpf: {
+        type: String,
+        required: false
+    },
     hasWhatsapp: {
         type: Boolean,
         default: false
     },
     birthday: {
-        type: Date,
+        type: String,
         required: false
     },
     address: {
