@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        required: false,
+        enum: ['admin', 'user'],
         default: 'user'
     },
     password: {
@@ -21,6 +21,41 @@ const userSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
+    },
+    phone: {
+        type: String,
+        required: false
+    },
+    hasWhatsapp: {
+        type: Boolean,
+        default: false
+    },
+    birthday: {
+        type: Date,
+        required: false
+    },
+    address: {
+        type: {
+            cep: String,
+            neighborhood: String,
+            street: String,
+            number: String,
+            city: String,
+            state: String,
+            country: {
+                type: String,
+                default: 'Brasil'
+            }
+        },
+        default: {
+            street: '',
+            number: '',
+            city: '',
+            state: '',
+            country: 'Brasil',
+            neighborhood: '',
+            cep: ''
+        }
     },
     activeToken: {
         type: String,

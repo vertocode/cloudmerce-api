@@ -140,6 +140,18 @@ export const getCart = async ({ cartId, ecommerceId }: IGetCart) => {
     return cart
 }
 
+export const setUserId = async (cartId: Types.ObjectId, userId: Types.ObjectId) => {
+    const cart = await Cart.findById({ _id: cartId })
+    if (!cart) {
+        throw new Error('Carrinho não encontrado.')
+    }
+
+    cart.userId = userId
+    await cart.save()
+
+    return cart
+}
+
 interface ICreateOrder {
     cartId: Types.ObjectId;
     userId: Types.ObjectId;

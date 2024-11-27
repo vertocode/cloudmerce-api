@@ -1,6 +1,7 @@
 import User from '../models/User'
 import { AuthParams, User as UserType } from '../types/User'
 import {uuid} from "uuidv4";
+import {Types} from "mongoose";
 
 export async function getUsers() {
     return User.find()
@@ -8,6 +9,10 @@ export async function getUsers() {
 
 export async function checkUserExists(email: string) {
     return User.find({ email })
+}
+
+export async function updateUser(_id: Types.ObjectId, data: Partial<UserType>) {
+    return User.findByIdAndUpdate(_id, data)
 }
 
 export async function createUser(data: UserType) {
@@ -26,7 +31,7 @@ export async function auth(data: AuthParams): Promise<UserType | { errorMessage:
     }
     const response = await User.find(filters)
     if (response.length) {
-        const { _id, name, email, password, createdAt, role = 'user' } = response.at(0) as unknown as UserType
+        const { _id, name, email, password, createdAt, address, role = 'user' } = response.at(0) as unknown as UserType
         return {
             _id,
             name,
@@ -34,6 +39,7 @@ export async function auth(data: AuthParams): Promise<UserType | { errorMessage:
             password,
             role,
             createdAt,
+            address,
             activeToken: generateToken(),
             activeTokenExpires: new Date(Date.now() + 86400000)
         }

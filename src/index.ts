@@ -4,19 +4,19 @@ import cors from 'cors'
 import {auth, checkUserExists, createUser, getUsers} from './services/user'
 import {
     addProductType,
-    deleteProductType,
-    updateProductType,
     addProduct,
     deleteProduct,
     updateProduct,
     getProductsByEcommerceId,
     getProductTypesByEcommerceId,
-    getProductsByFilters, updateProductTypes
+    getProductsByFilters,
+    updateProductTypes
 } from './services/product';
 import * as mongoose from "mongoose"
 import dotenv from 'dotenv'
 import {addItemToCart, changeQuantity, createOrder, getCart} from "./services/cart";
 import {Types} from "mongoose";
+import {setUserData} from "./services/checkout";
 
 dotenv.config()
 
@@ -256,12 +256,27 @@ app.put('/change-cart-item-quantity/:ecommerceId', async (req, res: Response): P
     }
 })
 
+app.post('/checkout/user/:ecommerceId', async (req, res: Response): Promise<void> => {
+    try {
+        const { ecommerceId } = req.params
+        const { cartId, userData } = req.body
+
+        const response = await setUserData({
+            cartId,
+            userData
+        })
+
+        res.status(200).send(response)
+    } catch (e) {
+        console.error(e)
+        res.status(500).send({ error: 'Erro ao realizar o cadastro dos dados do usuario no checkout.', code: 'error' })
+    }
+})
+
 app.post('/order/:ecommerceId', async (req, res: Response): Promise<void> => {
     try {
         const { ecommerceId } = req.params;
         const { cartId, userId, paymentIntentId, elements } = req.body;
-
-        console.log('req.body >>>', req.body)
 
         const response = await createOrder({
             cartId,
@@ -275,7 +290,7 @@ app.post('/order/:ecommerceId', async (req, res: Response): Promise<void> => {
         console.error(err);
         res.status(500).send({ error: 'Erro ao criar o pedido.', code: 'error' });
     }
-});
+})
 
 app.listen(port, (): void => {
     console.log(`Cloudmerce API running on port: ${port}`)

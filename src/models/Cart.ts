@@ -9,6 +9,11 @@ export const cartSchema = new mongoose.Schema({
       type: String,
       default: 'active'
     },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: false
+    },
     items: [{
         productId: {
             type: mongoose.Schema.Types.ObjectId,
