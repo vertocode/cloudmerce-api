@@ -31,13 +31,17 @@ export async function auth(data: AuthParams): Promise<UserType | { errorMessage:
     }
     const response = await User.find(filters)
     if (response.length) {
-        const { _id, name, email, password, createdAt, address, role = 'user' } = response.at(0) as unknown as UserType
+        const { _id, name, email, password, createdAt, address, role = 'user', cpf, phone, hasWhatsapp, birthday } = response.at(0) as unknown as UserType
         return {
             _id,
             name,
             email,
             password,
             role,
+            cpf,
+            phone,
+            birthday,
+            hasWhatsapp,
             createdAt,
             address,
             activeToken: generateToken(),

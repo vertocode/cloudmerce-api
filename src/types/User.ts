@@ -15,6 +15,10 @@ export interface User {
     name: string
     email: string
     role?: 'admin' | 'user'
+    cpf?: string
+    phone?: string
+    hasWhatsapp?: boolean
+    birthday?: string
     password: string
     createdAt: Date
     address: UserAddress
