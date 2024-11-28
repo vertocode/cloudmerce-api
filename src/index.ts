@@ -17,6 +17,7 @@ import dotenv from 'dotenv'
 import {addItemToCart, changeQuantity, createOrder, getCart} from "./services/cart";
 import {Types} from "mongoose";
 import {setUserData} from "./services/checkout";
+import {getOrderById} from "./services/order";
 
 dotenv.config()
 
@@ -291,6 +292,17 @@ app.post('/order/:ecommerceId', async (req, res: Response): Promise<void> => {
     } catch (err) {
         console.error(err);
         res.status(500).send({ error: 'Erro ao criar o pedido.', code: 'error' });
+    }
+})
+
+app.get('/order/:orderId/:ecommerceId', async (req, res: Response): Promise<void> => {
+    try {
+        const { orderId, ecommerceId } = req.params
+        const response = await getOrderById({ orderId, ecommerceId })
+        res.status(200).send(response)
+    } catch (err) {
+        console.error(err)
+        res.status(500).send({ error: 'Erro ao buscar o pedido.', code: 'error' })
     }
 })
 
