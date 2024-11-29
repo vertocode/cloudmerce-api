@@ -10,7 +10,7 @@ import {
     getProductsByEcommerceId,
     getProductTypesByEcommerceId,
     getProductsByFilters,
-    updateProductTypes
+    updateProductTypes, getProductById
 } from './services/product';
 import * as mongoose from "mongoose"
 import dotenv from 'dotenv'
@@ -203,6 +203,21 @@ app.get('/products/ecommerce/:ecommerceId', async (req, res: Response): Promise<
         res.status(500).send({ error: errorMessage });
     }
 });
+
+app.get('/products/:ecommerceId/:productId', async (req, res: Response): Promise<void> => {
+    try {
+        const { ecommerceId, productId } = req.params
+        if (!ecommerceId || !productId) {
+            throw new Error('Invalid body, ecommerceId and productId are required.')
+        }
+
+        const response = await getProductById(new mongoose.Types.ObjectId(productId), ecommerceId)
+        res.status(200).send(response)
+    } catch (error) {
+        const errorMessage = `Error getting product: ${error}`
+        res.status(500).send({ error: errorMessage })
+    }
+})
 
 app.get('/product-types/ecommerce/:ecommerceId', async (req, res: Response): Promise<void> => {
     try {

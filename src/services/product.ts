@@ -111,8 +111,12 @@ export async function updateProduct(productId: Types.ObjectId, data: Partial<Pro
     }, { new: true })
 }
 
+export async function getProductById(productId: Types.ObjectId, ecommerceId: string) {
+    return Product.findById({ _id: productId, ecommerceId })
+}
+
 export async function getProductsByEcommerceId(ecommerceId: string) {
-    return Product.find({ecommerceId})
+    return Product.find({ ecommerceId })
 }
 
 export async function getProductsByFilters(filters: IProductFilters) {
