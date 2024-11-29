@@ -1,4 +1,5 @@
 import Order from "../models/Order";
+import mongoose from "mongoose";
 
 interface IGetOrderById {
     orderId: string
@@ -20,7 +21,26 @@ interface IGetOrdersByUserId {
 }
 
 export const getOrdersByUserId = async ({ userId, ecommerceId }: IGetOrdersByUserId) => {
-    const orders = await Order.find({ userId, ecommerceId }).populate('items.productId')
+    try {
+        console.log('Valor do userId:', userId)
 
-    return orders || []
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            throw new Error('userId inválido')
+        }
+
+        const objectIdUser = new mongoose.Types.ObjectId(userId)
+
+        console.log('Consultando pedidos com userId:', objectIdUser, 'ecommerceId:', ecommerceId)
+
+        const orders = await Order.find({ userId: objectIdUser, ecommerceId }).populate('items.productId')
+
+        if (!orders || orders.length === 0) {
+            console.log('Nenhum pedido encontrado para esse userId e ecommerceId')
+        }
+
+        return orders || []
+    } catch (err) {
+        console.error(err)
+        throw new Error('Erro ao buscar pedidos')
+    }
 }

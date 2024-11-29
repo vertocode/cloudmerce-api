@@ -10,8 +10,7 @@ export const orderSchema = new mongoose.Schema({
       enum: ['paid', 'pending']
     },
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        type: mongoose.Schema.Types.ObjectId
     },
     paymentIntentId: {
         type: String,

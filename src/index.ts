@@ -279,7 +279,7 @@ app.post('/checkout/user/:ecommerceId', async (req, res: Response): Promise<void
 app.post('/order/:ecommerceId', async (req, res: Response): Promise<void> => {
     try {
         const { ecommerceId } = req.params;
-        const { cartId, userId, paymentIntentId, elements } = req.body;
+        const { cartId, userId, paymentIntentId } = req.body;
 
         const response = await createOrder({
             cartId,
@@ -308,8 +308,9 @@ app.get('/order/:orderId/:ecommerceId', async (req, res: Response): Promise<void
 
 app.get('/orders/:ecommerceId', async (req, res: Response): Promise<void> => {
     try {
-        const { userId, ecommerceId } = req.params
-        const response = await getOrdersByUserId({ userId, ecommerceId })
+        const { ecommerceId } = req.params
+        const { userId } = req.query
+        const response = await getOrdersByUserId({ userId: userId as string, ecommerceId })
         res.status(200).send(response)
     } catch (err) {
         console.error(err)
