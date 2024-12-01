@@ -79,17 +79,7 @@ app.get("/auth/login", async (req, res: Response): Promise<void> => {
     console.error(errorMessage);
     res.status(500).send({ error: errorMessage });
   }
-});
-
-app.get("/users", async (_, res: Response): Promise<void> => {
-  try {
-    const response = await getUsers();
-    res.status(200).send(response);
-  } catch (error) {
-    const errorMessage = `Error getting users: ${error}`;
-    res.status(500).send({ error: errorMessage });
-  }
-});
+})
 
 app.post("/users", async (req, res: Response): Promise<void> => {
   try {
