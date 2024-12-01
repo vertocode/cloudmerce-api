@@ -1,29 +1,29 @@
-import {User as UserType} from '../types/User'
-import {checkUserExists, createUser, updateUser} from "./user";
-import {setUserId} from "./cart";
-import {Types} from "mongoose";
+import { User as UserType } from "../types/User";
+import { checkUserExists, createUser, updateUser } from "./user";
+import { setUserId } from "./cart";
+import { Types } from "mongoose";
 
 interface SetUserDataParams {
-    cartId: Types.ObjectId
-    userData: UserType | Partial<UserType>
+  cartId: Types.ObjectId;
+  userData: UserType | Partial<UserType>;
 }
 
 export const setUserData = async ({ userData, cartId }: SetUserDataParams) => {
-    const isLogged = !!userData?._id
+  const isLogged = !!userData?._id;
 
-    if (!isLogged) {
-        userData = await createUser(userData as UserType) as UserType
-    } else {
-        const userExists = await checkUserExists(userData.email as string)
+  if (!isLogged) {
+    userData = (await createUser(userData as UserType)) as UserType;
+  } else {
+    const userExists = await checkUserExists(userData.email as string);
 
-        if (!userExists) {
-            throw new Error('User not found with email: ' + userData.email)
-        }
-
-        await updateUser(userData?._id as Types.ObjectId, userData)
+    if (!userExists) {
+      throw new Error("User not found with email: " + userData.email);
     }
 
-    await setUserId(cartId, userData?._id as Types.ObjectId)
+    await updateUser(userData?._id as Types.ObjectId, userData);
+  }
 
-    return userData
-}
+  await setUserId(cartId, userData?._id as Types.ObjectId);
+
+  return userData;
+};
