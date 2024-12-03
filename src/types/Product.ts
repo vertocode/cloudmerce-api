@@ -18,6 +18,7 @@ export interface IProductFilters {
   productType?: string | null;
   search?: string | null;
   limit?: number | null;
+  page?: number | null;
 }
 
 export interface UpdateProductTypesParams {

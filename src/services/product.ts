@@ -175,16 +175,19 @@ export async function getProductsByEcommerceId(ecommerceId: string) {
 }
 
 export async function getProductsByFilters(filters: IProductFilters) {
-  const { ecommerceId, productType, search, limit } = filters;
-  const query: any = { ecommerceId };
+  const { ecommerceId, productType, search, limit, page } = filters
+  const query: any = { ecommerceId }
   if (productType) {
-    query.productType = productType;
+    query.productType = productType
   }
   if (search) {
-    query.name = { $regex: search, $options: "i" };
+    query.name = { $regex: search, $options: "i" }
   }
-  if (limit) {
-    return Product.find(query).limit(limit)
-  }
+
+  const pageNumber = page && page > 0 ? page : 1 // Default to page 1 if not provided or invalid
+  const pageSize = limit || 20 // Default to 10 items per page if not provided
+
   return Product.find(query)
+      .skip((pageNumber - 1) * pageSize) // Skip documents based on the current page
+      .limit(pageSize) // Limit the number of documents returned
 }
