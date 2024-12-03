@@ -175,7 +175,7 @@ export async function getProductsByEcommerceId(ecommerceId: string) {
 }
 
 export async function getProductsByFilters(filters: IProductFilters) {
-  const { ecommerceId, productType, search } = filters;
+  const { ecommerceId, productType, search, limit } = filters;
   const query: any = { ecommerceId };
   if (productType) {
     query.productType = productType;
@@ -183,5 +183,8 @@ export async function getProductsByFilters(filters: IProductFilters) {
   if (search) {
     query.name = { $regex: search, $options: "i" };
   }
-  return Product.find(query);
+  if (limit) {
+    return Product.find(query).limit(limit)
+  }
+  return Product.find(query)
 }

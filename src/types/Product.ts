@@ -17,6 +17,7 @@ export interface IProductFilters {
   ecommerceId: string;
   productType?: string | null;
   search?: string | null;
+  limit?: number | null;
 }
 
 export interface UpdateProductTypesParams {

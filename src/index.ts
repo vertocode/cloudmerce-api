@@ -226,14 +226,15 @@ app.get(
   async (req, res: Response): Promise<void> => {
     try {
       const { ecommerceId } = req.params || {};
-      const { productType = null, search = null } = req.query || {};
+      const { productType = null, search = null, limit = null } = req.query || {};
       let response;
-      if (productType || search) {
+      if (productType || search || limit) {
         response = await getProductsByFilters({
           ecommerceId,
           productType: productType as string,
           search: search as string,
-        });
+          limit: limit as number | null
+        })
       } else {
         response = await getProductsByEcommerceId(ecommerceId);
       }
