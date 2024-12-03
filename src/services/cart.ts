@@ -1,55 +1,55 @@
-import Cart from "../models/Cart";
-import { Types } from "mongoose";
-import Product from "../models/Product";
-import Stripe from "stripe";
-import dotenv from "dotenv";
-import Order from "../models/Order";
+import Cart from '../models/Cart'
+import { Types } from 'mongoose'
+import Product from '../models/Product'
+import Stripe from 'stripe'
+import dotenv from 'dotenv'
+import Order from '../models/Order'
 
-dotenv.config();
+dotenv.config()
 
-const apiKey = process.env.STRIPE_API_KEY || "";
+const apiKey = process.env.STRIPE_API_KEY || ''
 if (!apiKey) {
-  throw new Error("Stripe API key not found.");
+  throw new Error('Stripe API key not found.')
 }
-const stripe = new Stripe(apiKey);
+const stripe = new Stripe(apiKey)
 
 export const createCart = async (ecommerceId: string) => {
   const newCart = new Cart({
     ecommerceId,
     items: [],
-  });
+  })
 
-  await newCart.save();
-  return newCart;
-};
+  await newCart.save()
+  return newCart
+}
 
 interface Field {
-  fieldLabel: string;
-  value: string;
+  fieldLabel: string
+  value: string
 }
 
 const getExistingItem = (
   cart: any,
   productId: Types.ObjectId,
-  fields: Field[],
+  fields: Field[]
 ) => {
   return cart.items.find((item: any) => {
-    const hasTheSameId = item.productId?.toString() === productId.toString();
+    const hasTheSameId = item.productId?.toString() === productId.toString()
     const hasTheSameFields = item.fieldValues?.every((field: any) => {
-      const newField = fields.find((f) => f.fieldLabel === field.fieldLabel);
-      return newField?.value === field?.value;
-    });
+      const newField = fields.find((f) => f.fieldLabel === field.fieldLabel)
+      return newField?.value === field?.value
+    })
 
-    return hasTheSameId && hasTheSameFields;
-  });
-};
+    return hasTheSameId && hasTheSameFields
+  })
+}
 
 interface IItemToCart {
-  cartId: Types.ObjectId | null;
-  productId: Types.ObjectId;
-  fields: Field[];
-  quantity: number;
-  ecommerceId: string;
+  cartId: Types.ObjectId | null
+  productId: Types.ObjectId
+  fields: Field[]
+  quantity: number
+  ecommerceId: string
 }
 
 export const addItemToCart = async ({
@@ -59,33 +59,33 @@ export const addItemToCart = async ({
   fields,
   ecommerceId,
 }: IItemToCart) => {
-  let newCartId = cartId;
+  let newCartId = cartId
   if (!newCartId) {
-    const newCart = await createCart(ecommerceId);
-    newCartId = newCart._id;
+    const newCart = await createCart(ecommerceId)
+    newCartId = newCart._id
   }
 
-  const cart = await Cart.findById({ _id: newCartId, ecommerceId });
+  const cart = await Cart.findById({ _id: newCartId, ecommerceId })
 
   if (!cart) {
-    throw new Error("Carrinho não encontrado.");
+    throw new Error('Carrinho não encontrado.')
   }
 
-  const existingItem = getExistingItem(cart, productId, fields);
+  const existingItem = getExistingItem(cart, productId, fields)
 
-  const product = await Product.findById(productId);
+  const product = await Product.findById(productId)
   if (!product) {
-    throw new Error("Produto não encontrado.");
+    throw new Error('Produto não encontrado.')
   }
 
   const handleIncreaseQuantity = () => {
-    if (!existingItem) return;
+    if (!existingItem) return
 
-    existingItem.quantity += quantity;
+    existingItem.quantity += quantity
     if (fields.length) {
-      existingItem.fieldValues = fields as any;
+      existingItem.fieldValues = fields as any
     }
-  };
+  }
 
   const handleNewItem = () => {
     cart.items.push({
@@ -93,21 +93,21 @@ export const addItemToCart = async ({
       quantity,
       price: product.price,
       fieldValues: fields,
-    });
-  };
-
-  if (existingItem) {
-    handleIncreaseQuantity();
-  } else {
-    handleNewItem();
+    })
   }
 
-  cart.updatedAt = new Date();
+  if (existingItem) {
+    handleIncreaseQuantity()
+  } else {
+    handleNewItem()
+  }
 
-  await cart.save();
+  cart.updatedAt = new Date()
 
-  return cart;
-};
+  await cart.save()
+
+  return cart
+}
 
 export const changeQuantity = async ({
   cartId,
@@ -116,70 +116,70 @@ export const changeQuantity = async ({
   fields,
   ecommerceId,
 }: IItemToCart) => {
-  const cart = await Cart.findOne({ _id: cartId, ecommerceId });
+  const cart = await Cart.findOne({ _id: cartId, ecommerceId })
 
   if (!cart) {
     throw new Error(
-      `Cart not found with cartId: ${cartId} (ecommerceId: ${ecommerceId}).`,
-    );
+      `Cart not found with cartId: ${cartId} (ecommerceId: ${ecommerceId}).`
+    )
   }
 
-  const existingItem = getExistingItem(cart, productId, fields);
+  const existingItem = getExistingItem(cart, productId, fields)
 
   if (!existingItem) {
-    throw new Error(`Item not found in cart with productId: ${productId}.`);
+    throw new Error(`Item not found in cart with productId: ${productId}.`)
   }
 
   if (quantity === 0) {
     // @ts-ignore
-    cart.items = cart.items.filter((item) => item !== existingItem);
+    cart.items = cart.items.filter((item) => item !== existingItem)
   } else {
-    existingItem.quantity = quantity;
+    existingItem.quantity = quantity
   }
 
-  cart.updatedAt = new Date();
+  cart.updatedAt = new Date()
 
-  await cart.save();
+  await cart.save()
 
-  return cart;
-};
+  return cart
+}
 
 interface IGetCart {
-  cartId: Types.ObjectId;
-  ecommerceId: string;
+  cartId: Types.ObjectId
+  ecommerceId: string
 }
 
 export const getCart = async ({ cartId, ecommerceId }: IGetCart) => {
   const cart = await Cart.findById({ _id: cartId, ecommerceId }).populate(
-    "items.productId",
-  );
+    'items.productId'
+  )
   if (!cart) {
-    throw new Error("Carrinho não encontrado.");
+    throw new Error('Carrinho não encontrado.')
   }
 
-  return cart;
-};
+  return cart
+}
 
 export const setUserId = async (
   cartId: Types.ObjectId,
-  userId: Types.ObjectId,
+  userId: Types.ObjectId
 ) => {
-  const cart = await Cart.findById({ _id: cartId });
+  const cart = await Cart.findById({ _id: cartId })
   if (!cart) {
-    throw new Error("Carrinho não encontrado.");
+    throw new Error('Carrinho não encontrado.')
   }
 
-  cart.userId = userId;
-  await cart.save();
+  cart.userId = userId
+  await cart.save()
 
-  return cart;
-};
+  return cart
+}
 
 interface ICreateOrder {
-  cartId: Types.ObjectId;
-  userId: Types.ObjectId;
-  ecommerceId: string;
-  paymentIntentId: string;
+  cartId: Types.ObjectId
+  userId: Types.ObjectId
+  ecommerceId: string
+  paymentIntentId: string
 }
 
 export const createOrder = async ({
@@ -189,15 +189,15 @@ export const createOrder = async ({
   paymentIntentId,
 }: ICreateOrder) => {
   const cart = await Cart.findById({ _id: cartId, ecommerceId }).populate(
-    "items.productId",
-  );
+    'items.productId'
+  )
   if (!cart) {
-    throw new Error("Carrinho não encontrado.");
+    throw new Error('Carrinho não encontrado.')
   }
 
-  const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-  if (paymentIntent.status !== "succeeded") {
-    throw new Error("O pagamento não foi concluído com sucesso.");
+  const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+  if (paymentIntent.status !== 'succeeded') {
+    throw new Error('O pagamento não foi concluído com sucesso.')
   }
 
   const newOrder = new Order({
@@ -205,14 +205,14 @@ export const createOrder = async ({
     ecommerceId,
     items: cart.items,
     totalAmount: paymentIntent.amount_received,
-    paymentMethod: "card",
+    paymentMethod: 'card',
     paymentIntentId,
-    status: "paid",
-  });
+    status: 'paid',
+  })
 
-  await newOrder.save();
+  await newOrder.save()
 
-  await Cart.findByIdAndDelete(cartId);
+  await Cart.findByIdAndDelete(cartId)
 
-  return newOrder;
-};
+  return newOrder
+}

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose'
 
 export const orderSchema = new mongoose.Schema({
   ecommerceId: {
@@ -7,7 +7,7 @@ export const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["paid", "pending"],
+    enum: ['paid', 'pending'],
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -18,13 +18,13 @@ export const orderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ["pix", "card"],
+    enum: ['pix', 'card'],
   },
   items: [
     {
       productId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
+        ref: 'Product',
         required: true,
       },
       fieldValues: {
@@ -58,6 +58,6 @@ export const orderSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-});
+})
 
-export default mongoose.model("Order", orderSchema);
+export default mongoose.model('Order', orderSchema)

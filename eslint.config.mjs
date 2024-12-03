@@ -18,10 +18,18 @@ export default [
             prettier: prettierPlugin,
         },
         rules: {
-            'prettier/prettier': 'error',
             'no-console': 'off',
+            'semi': ['error', 'never'],
             '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
             '@typescript-eslint/no-explicit-any': 'warn',
+            'prettier/prettier': [
+                'error',
+                {
+                    semi: false,
+                    singleQuote: true,
+                    trailingComma: 'es5',
+                },
+            ]
         },
     },
 ];

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose'
 
 const productTypeSchema = new mongoose.Schema({
   ecommerceId: {
@@ -17,6 +17,6 @@ const productTypeSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-});
+})
 
-export default mongoose.model("ProductType", productTypeSchema);
+export default mongoose.model('ProductType', productTypeSchema)

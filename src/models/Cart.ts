@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose'
 
 export const cartSchema = new mongoose.Schema({
   ecommerceId: {
@@ -7,18 +7,18 @@ export const cartSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    default: "active",
+    default: 'active',
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: 'User',
     required: false,
   },
   items: [
     {
       productId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
+        ref: 'Product',
         required: true,
       },
       fieldValues: {
@@ -52,6 +52,6 @@ export const cartSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-});
+})
 
-export default mongoose.model("Cart", cartSchema);
+export default mongoose.model('Cart', cartSchema)

@@ -1,37 +1,37 @@
-import User from "../models/User";
-import { AuthParams, User as UserType } from "../types/User";
-import { uuid } from "uuidv4";
-import { Types } from "mongoose";
+import User from '../models/User'
+import { AuthParams, User as UserType } from '../types/User'
+import { uuid } from 'uuidv4'
+import { Types } from 'mongoose'
 
 export async function getUsers() {
-  return User.find();
+  return User.find()
 }
 
 export async function checkUserExists(email: string) {
-  return User.find({ email });
+  return User.find({ email })
 }
 
 export async function updateUser(_id: Types.ObjectId, data: Partial<UserType>) {
-  return User.findByIdAndUpdate(_id, data);
+  return User.findByIdAndUpdate(_id, data)
 }
 
 export async function createUser(data: UserType) {
-  return User.create(data);
+  return User.create(data)
 }
 
 function generateToken() {
-  return uuid();
+  return uuid()
 }
 
-type ErrorCodes = "user_not_found";
+type ErrorCodes = 'user_not_found'
 export async function auth(
-  data: AuthParams,
+  data: AuthParams
 ): Promise<UserType | { errorMessage: string; errorCode: ErrorCodes }> {
   const filters = {
     email: { $eq: data.email },
     password: { $eq: data.password },
-  };
-  const response = await User.find(filters);
+  }
+  const response = await User.find(filters)
   if (response.length) {
     const {
       _id,
@@ -40,12 +40,12 @@ export async function auth(
       password,
       createdAt,
       address,
-      role = "user",
+      role = 'user',
       cpf,
       phone,
       hasWhatsapp,
       birthday,
-    } = response.at(0) as unknown as UserType;
+    } = response.at(0) as unknown as UserType
     return {
       _id,
       name,
@@ -60,8 +60,8 @@ export async function auth(
       address,
       activeToken: generateToken(),
       activeTokenExpires: new Date(Date.now() + 86400000),
-    };
+    }
   } else {
-    return { errorMessage: "User not found", errorCode: "user_not_found" };
+    return { errorMessage: 'User not found', errorCode: 'user_not_found' }
   }
 }

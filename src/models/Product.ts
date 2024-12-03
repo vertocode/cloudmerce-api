@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose'
 
 const productSchema = new mongoose.Schema({
   ecommerceId: {
@@ -33,7 +33,7 @@ const productSchema = new mongoose.Schema({
       },
       type: {
         type: String,
-        enum: ["text", "number", "options"],
+        enum: ['text', 'number', 'options'],
         required: true,
       },
       options: {
@@ -50,6 +50,6 @@ const productSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-});
+})
 
-export default mongoose.model("Product", productSchema);
+export default mongoose.model('Product', productSchema)
