@@ -1,7 +1,7 @@
 import type { Express } from 'express'
 import express, { Response } from 'express'
 import cors from 'cors'
-import { auth, checkUserExists, createUser, getUsers } from './services/user'
+import { auth, checkUserExists, createUser } from './services/user'
 import {
   addProductType,
   addProduct,
