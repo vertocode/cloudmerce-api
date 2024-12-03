@@ -79,7 +79,7 @@ app.get("/auth/login", async (req, res: Response): Promise<void> => {
     console.error(errorMessage);
     res.status(500).send({ error: errorMessage });
   }
-})
+});
 
 app.post("/users", async (req, res: Response): Promise<void> => {
   try {
@@ -230,7 +230,7 @@ app.get(
         productType = null,
         search = null,
         limit = null,
-        page = null
+        page = null,
       } = req.query || {};
       let response;
       if (productType || search || limit) {
@@ -238,9 +238,9 @@ app.get(
           ecommerceId,
           productType: productType as string,
           search: search as string,
-          limit: limit as number | null,
-          page: page as number | null
-        })
+          limit: Number(limit) as number,
+          page: Number(page) as number,
+        });
       } else {
         response = await getProductsByEcommerceId(ecommerceId);
       }

@@ -175,19 +175,31 @@ export async function getProductsByEcommerceId(ecommerceId: string) {
 }
 
 export async function getProductsByFilters(filters: IProductFilters) {
-  const { ecommerceId, productType, search, limit, page } = filters
-  const query: any = { ecommerceId }
+  const { ecommerceId, productType, search, limit, page } = filters;
+
+  const query: any = { ecommerceId };
   if (productType) {
-    query.productType = productType
+    query.productType = productType;
   }
   if (search) {
-    query.name = { $regex: search, $options: "i" }
+    query.name = { $regex: search, $options: "i" };
   }
 
-  const pageNumber = page && page > 0 ? page : 1 // Default to page 1 if not provided or invalid
-  const pageSize = limit || 20 // Default to 10 items per page if not provided
+  const pageNumber = page && page > 0 ? page : 1;
+  const pageSize = limit || 20;
 
-  return Product.find(query)
-      .skip((pageNumber - 1) * pageSize) // Skip documents based on the current page
-      .limit(pageSize) // Limit the number of documents returned
+  const totalDocuments = await Product.countDocuments(query);
+
+  const totalPages = Math.ceil(totalDocuments / pageSize);
+
+  const products = await Product.find(query)
+    .skip((pageNumber - 1) * pageSize)
+    .limit(pageSize);
+
+  return {
+    products,
+    totalPages,
+    page: pageNumber,
+    limit: pageSize,
+  };
 }
