@@ -1,10 +1,6 @@
 import mongoose from 'mongoose'
 
 export const whitelabelSchema = new mongoose.Schema({
-  ecommerceId: {
-    type: String,
-    required: true,
-  },
   baseUrl: {
     type: String,
     required: true,

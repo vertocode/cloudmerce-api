@@ -10,13 +10,11 @@ export const createWhitelabel = async (whitelabelData: IWhitelabel) => {
   }
 }
 
-export const getWhitelabelById = async (
-  whitelabelId: string
-): Promise<IWhitelabel | null> => {
+export const getWhitelabelByBaseUrl = async (baseUrl: string): Promise<any> => {
   try {
-    const whitelabel = await Whitelabel.findById(whitelabelId)
-    if (!whitelabel) {
-      return null
+    const whitelabel = await Whitelabel.find({ baseUrl })
+    if (!whitelabel || !whitelabel?.length) {
+      return { code: 404, message: 'Whitelabel not found' }
     }
     return whitelabel
   } catch (error) {

@@ -25,7 +25,7 @@ import { Types } from 'mongoose'
 import { setUserData } from './services/checkout'
 import { getOrderById, getOrdersByUserId } from './services/order'
 import { IWhitelabel } from './types/Whitelabel'
-import { createWhitelabel, getWhitelabelById } from './services/whitelabel'
+import { createWhitelabel, getWhitelabelByBaseUrl } from './services/whitelabel'
 
 dotenv.config()
 
@@ -474,18 +474,18 @@ app.post('/whitelabel', async (req, res: Response): Promise<void> => {
   }
 })
 
-app.get('/whitelabel/:id', async (req, res: Response): Promise<void> => {
+app.get('/whitelabel/:baseUrl', async (req, res: Response): Promise<void> => {
   try {
-    const { id } = req.params
+    const { baseUrl } = req.params
 
-    if (!id) {
+    if (!baseUrl) {
       res.status(400).send({
-        error: 'Invalid request, whitelabel ID is required.',
+        error: 'Invalid request, whitelabel baseUrl is required.',
       })
       return
     }
 
-    const whitelabel = await getWhitelabelById(id)
+    const whitelabel = await getWhitelabelByBaseUrl(baseUrl)
 
     res.status(200).send(whitelabel)
   } catch (error) {
