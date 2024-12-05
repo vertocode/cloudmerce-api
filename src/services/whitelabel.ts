@@ -48,3 +48,31 @@ export const getWhitelabelByBaseUrl = async (
     throw error
   }
 }
+
+export const updateWhitelabelById = async (
+  id: string,
+  whitelabelData: Partial<IWhitelabel>
+): Promise<any> => {
+  try {
+    const whitelabel = await Whitelabel.findById(id)
+
+    if (!whitelabel) {
+      return { code: 404, message: 'Whitelabel not found' }
+    }
+
+    Object.keys(whitelabelData).forEach((key: string) => {
+      if (whitelabelData[key as keyof IWhitelabel] !== undefined) {
+        // @ts-ignore
+        whitelabel[key] = whitelabelData[key as keyof IWhitelabel]
+      }
+    })
+
+    whitelabel.updatedAt = new Date()
+    await whitelabel.save()
+
+    return { code: 200, message: 'Whitelabel updated successfully', whitelabel }
+  } catch (error) {
+    console.error('Error updating whitelabel:', error)
+    throw error
+  }
+}
