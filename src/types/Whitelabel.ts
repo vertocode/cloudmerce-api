@@ -1,7 +1,6 @@
 import mongoose from 'mongoose'
 
 export interface IWhitelabel {
-  ecommerceId: string
   baseUrl: string
   name: string
   description?: string | null

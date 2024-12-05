@@ -430,7 +430,6 @@ app.get('/orders/:ecommerceId', async (req, res: Response): Promise<void> => {
 app.post('/whitelabel', async (req, res: Response): Promise<void> => {
   try {
     const {
-      ecommerceId,
       baseUrl,
       name,
       description,
@@ -443,7 +442,7 @@ app.post('/whitelabel', async (req, res: Response): Promise<void> => {
       pixKey,
     } = req.body
 
-    if (!ecommerceId || !baseUrl || !name) {
+    if (!baseUrl || !name) {
       res.status(400).send({
         error: 'Invalid body, ecommerceId, baseUrl, and name are required.',
       })
@@ -451,7 +450,6 @@ app.post('/whitelabel', async (req, res: Response): Promise<void> => {
     }
 
     const whitelabelData: IWhitelabel = {
-      ecommerceId,
       baseUrl,
       name,
       description,
