@@ -89,10 +89,20 @@ app.get('/auth/login', async (req, res: Response): Promise<void> => {
 
 app.post('/users', async (req, res: Response): Promise<void> => {
   try {
-    if (!req.body.name || !req.body.email || !req.body.password) {
-      throw new Error('Invalid body, name, email and password are required.')
+    if (
+      !req.body.name ||
+      !req.body.email ||
+      !req.body.password ||
+      !req.body.whitelabelId
+    ) {
+      throw new Error(
+        'Invalid body, name, email, whitelabelId and password are required.'
+      )
     }
-    const userAlreadyExists = await checkUserExists(req.body.email)
+    const userAlreadyExists = await checkUserExists(
+      req.body.email,
+      req.body.whitelabelId
+    )
     if (userAlreadyExists && userAlreadyExists.length) {
       res.status(200).send({
         error: 'User already exists.',
@@ -358,12 +368,13 @@ app.post(
   '/checkout/user/:ecommerceId',
   async (req, res: Response): Promise<void> => {
     try {
-      // const { ecommerceId } = req.params;
+      const { ecommerceId } = req.params
       const { cartId, userData } = req.body
 
       const response = await setUserData({
         cartId,
         userData,
+        ecommerceId,
       })
 
       console.log('[/checkout/user]: User registered in cart with success.')

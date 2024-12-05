@@ -1,14 +1,18 @@
 import User from '../models/User'
 import { AuthParams, User as UserType } from '../types/User'
 import { uuid } from 'uuidv4'
-import { Types } from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 
 export async function getUsers() {
   return User.find()
 }
 
-export async function checkUserExists(email: string) {
-  return User.find({ email })
+export async function checkUserExists(email: string, whitelabelId: string) {
+  const filters = {
+    email: { $eq: email },
+    whitelabelId: { $eq: new mongoose.Types.ObjectId(whitelabelId) },
+  }
+  return User.find(filters)
 }
 
 export async function updateUser(_id: Types.ObjectId, data: Partial<UserType>) {

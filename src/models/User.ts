@@ -1,6 +1,11 @@
 import mongoose from 'mongoose'
 
 const userSchema = new mongoose.Schema({
+  whitelabelId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Whitelabel',
+    required: true,
+  },
   name: {
     type: String,
     required: true,

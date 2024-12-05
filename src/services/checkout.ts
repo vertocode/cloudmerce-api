@@ -6,15 +6,23 @@ import { Types } from 'mongoose'
 interface SetUserDataParams {
   cartId: Types.ObjectId
   userData: UserType | Partial<UserType>
+  ecommerceId: string
 }
 
-export const setUserData = async ({ userData, cartId }: SetUserDataParams) => {
+export const setUserData = async ({
+  userData,
+  cartId,
+  ecommerceId,
+}: SetUserDataParams) => {
   const isLogged = !!userData?._id
 
   if (!isLogged) {
     userData = (await createUser(userData as UserType)) as UserType
   } else {
-    const userExists = await checkUserExists(userData.email as string)
+    const userExists = await checkUserExists(
+      userData?.email as string,
+      ecommerceId
+    )
 
     if (!userExists) {
       throw new Error('User not found with email: ' + userData.email)
