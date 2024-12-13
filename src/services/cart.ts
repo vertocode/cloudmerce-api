@@ -150,9 +150,10 @@ interface IGetCart {
 }
 
 export const getCart = async ({ cartId, ecommerceId }: IGetCart) => {
-  const cart = await Cart.findById({ _id: cartId, ecommerceId }).populate(
-    'items.productId'
-  )
+  const cart = await Cart.findById({ _id: cartId, ecommerceId }).populate({
+    path: 'items.productId',
+    strictPopulate: false,
+  })
   if (!cart) {
     throw new Error('Carrinho não encontrado.')
   }
