@@ -46,6 +46,7 @@ const getExistingItem = (
 
 interface IItemToCart {
   cartId: Types.ObjectId | null
+  cartItemId?: Types.ObjectId
   productId: Types.ObjectId
   fields: Field[]
   quantity: number
@@ -112,6 +113,7 @@ export const addItemToCart = async ({
 export const changeQuantity = async ({
   cartId,
   productId,
+  cartItemId,
   quantity,
   fields,
   ecommerceId,
@@ -122,6 +124,39 @@ export const changeQuantity = async ({
     throw new Error(
       `Cart not found with cartId: ${cartId} (ecommerceId: ${ecommerceId}).`
     )
+  }
+
+  if (cartItemId) {
+    console.log(`Deleting expired item from cart with id: ${cartItemId}`)
+    const foundItem = cart.items.find(
+      (item) => item?._id?.toString() === cartItemId.toString()
+    )
+    if (!foundItem) {
+      throw new Error(`Item not found in cart with cartItemId: ${cartItemId}.`)
+    }
+    console.log('Item found to be deleted:', foundItem)
+
+    console.log('Cart before deleting item:', cart)
+
+    // @ts-ignore
+    cart.items = cart.items.filter((item) => {
+      console.log(
+        `${item._id} === ${foundItem._id}?`,
+        item._id === foundItem._id
+      )
+      return item._id !== foundItem._id
+    })
+
+    console.log('Cart after deleting item:', cart)
+
+    cart.updatedAt = new Date()
+
+    console.log('Saving cart...')
+    await cart.save()
+
+    console.log('Cart saved:', cart)
+
+    return cart
   }
 
   const existingItem = getExistingItem(cart, productId, fields)
