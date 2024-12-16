@@ -118,7 +118,7 @@ export const changeQuantity = async ({
   fields,
   ecommerceId,
 }: IItemToCart) => {
-  const cart = await Cart.findOne({ _id: cartId, ecommerceId })
+  const cart = await Cart.findOne({ _id: cartId })
 
   if (!cart) {
     throw new Error(
@@ -174,6 +174,15 @@ export const changeQuantity = async ({
 
   if (!existingItem) {
     throw new Error(`Item not found in cart with productId: ${productId}.`)
+  }
+
+  if (cart.items.length === 1) {
+    console.log('There is only 1 item in the cart, so the cart will be deleted')
+    await Cart.findByIdAndDelete(cartId)
+    console.log('Cart deleted:', cart)
+    return {
+      message: 'Cart deleted because the deleted item was the last item',
+    }
   }
 
   if (quantity === 0) {
