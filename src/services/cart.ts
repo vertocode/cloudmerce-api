@@ -136,6 +136,17 @@ export const changeQuantity = async ({
     }
     console.log('Item found to be deleted:', foundItem)
 
+    if (cart.items.length === 1) {
+      console.log(
+        'There is only 1 item in the cart, so the cart will be deleted'
+      )
+      await Cart.findByIdAndDelete(cartId)
+      console.log('Cart deleted:', cart)
+      return {
+        message: 'Cart deleted because the deleted item was the last item',
+      }
+    }
+
     console.log('Cart before deleting item:', cart)
 
     // @ts-ignore
