@@ -116,15 +116,15 @@ export const changeQuantity = async ({
   cartItemId,
   quantity,
   fields,
-  ecommerceId,
-}: IItemToCart) => {
+}: Omit<IItemToCart, 'ecommerceId'>) => {
   const cart = await Cart.findOne({ _id: cartId })
 
   if (!cart) {
-    throw new Error(
-      `Cart not found with cartId: ${cartId} (ecommerceId: ${ecommerceId}).`
-    )
+    throw new Error(`Cart not found with cartId: ${cartId}`)
   }
+
+  const shouldDeleteCart =
+    cart.items.length === 1 && cart.items[0].quantity === 1 && quantity === 0
 
   if (cartItemId) {
     console.log(`Deleting expired item from cart with id: ${cartItemId}`)
@@ -132,11 +132,12 @@ export const changeQuantity = async ({
       (item) => item?._id?.toString() === cartItemId.toString()
     )
     if (!foundItem) {
+      console.log('Item not found in cart:', cart)
       throw new Error(`Item not found in cart with cartItemId: ${cartItemId}.`)
     }
     console.log('Item found to be deleted:', foundItem)
 
-    if (cart.items.length === 1) {
+    if (shouldDeleteCart) {
       console.log(
         'There is only 1 item in the cart, so the cart will be deleted'
       )
@@ -176,7 +177,7 @@ export const changeQuantity = async ({
     throw new Error(`Item not found in cart with productId: ${productId}.`)
   }
 
-  if (cart.items.length === 1) {
+  if (shouldDeleteCart) {
     console.log('There is only 1 item in the cart, so the cart will be deleted')
     await Cart.findByIdAndDelete(cartId)
     console.log('Cart deleted:', cart)

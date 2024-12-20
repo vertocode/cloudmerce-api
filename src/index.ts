@@ -347,14 +347,12 @@ app.put(
   '/change-cart-item-quantity/:ecommerceId',
   async (req, res: Response): Promise<void> => {
     try {
-      const { ecommerceId } = req.params
       const { cartId, productId, quantity, fields = [], cartItemId } = req.body
       const response = await changeQuantity({
         cartId,
         productId,
         cartItemId,
         quantity,
-        ecommerceId,
         fields,
       })
       res.status(200).send(response)
