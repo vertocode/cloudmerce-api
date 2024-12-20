@@ -176,6 +176,7 @@ app.post('/products', async (req, res: Response): Promise<void> => {
       description = '',
       image = [],
       fields = [],
+      stock,
     } = req.body
     if (
       !ecommerceId ||
@@ -196,6 +197,7 @@ app.post('/products', async (req, res: Response): Promise<void> => {
       image,
       description,
       fields,
+      stock,
     })
     res.status(201).send(response)
   } catch (error) {

@@ -42,6 +42,16 @@ const productSchema = new mongoose.Schema({
       },
     },
   ],
+  stock: {
+    type: {
+      type: String,
+      enum: ['UNLIMITED', 'LIMITED', 'OUT_OF_STOCK'],
+      default: 'UNLIMITED',
+    },
+    quantity: {
+      type: Number,
+    },
+  },
   createdAt: {
     type: Date,
     default: Date.now,

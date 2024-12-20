@@ -5,6 +5,14 @@ const productTypeSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  icon: {
+    type: String,
+    required: false,
+  },
+  image: {
+    type: String,
+    required: false,
+  },
   name: {
     type: String,
     required: true,

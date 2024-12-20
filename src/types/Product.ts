@@ -7,6 +7,10 @@ export interface IProduct {
   productType: string
   description?: string
   image: string[]
+  stock: {
+    type: 'UNLIMITED' | 'LIMITED' | 'OUT_OF_STOCK'
+    quantity?: number
+  }
   fields: Array<{
     label: string
     type: 'text' | 'number' | 'options'
