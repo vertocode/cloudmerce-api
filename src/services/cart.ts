@@ -4,6 +4,7 @@ import Product from '../models/Product'
 import dotenv from 'dotenv'
 import Order from '../models/Order'
 import { createPayment, ICreatePayment } from './payment'
+import { PointOfInteraction } from 'mercadopago/dist/clients/payment/commonTypes'
 
 dotenv.config()
 
@@ -259,8 +260,9 @@ export const createOrder = async ({
   const paymentResponse = await createPayment(paymentData)
   console.log('payment created successfully.')
 
-  const { point_of_interaction } = paymentResponse || {}
-  if (!paymentResponse || !point_of_interaction?.qr_code_base64) {
+  const { point_of_interaction: { transaction_data = null } = {} } =
+    paymentResponse || {}
+  if (!transaction_data?.qr_code_base64) {
     console.error('qr code missing in the response:', paymentResponse)
     throw new Error('QR Code not found in payment response.')
   }
@@ -273,7 +275,8 @@ export const createOrder = async ({
     paymentData: {
       type: 'pix', // TOOD: Integrate other payment types
       totalAmount: paymentData.totalAmount,
-      qrCode: point_of_interaction?.qr_code_base64 as string,
+      qrCode: transaction_data.qr_code_base64,
+      pixCode: transaction_data.qr_code,
     },
     status: 'pending',
   })

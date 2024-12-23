@@ -395,13 +395,13 @@ app.post(
 app.post('/order/:ecommerceId', async (req, res: Response): Promise<void> => {
   try {
     const { ecommerceId } = req.params
-    const { cartId, userId, paymentIntentId } = req.body
+    const { cartId, userId, paymentData } = req.body
 
     const response = await createOrder({
       cartId,
       userId,
       ecommerceId,
-      paymentIntentId,
+      paymentData,
     })
 
     res.status(200).send({

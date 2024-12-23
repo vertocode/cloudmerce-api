@@ -20,11 +20,13 @@ export const orderSchema = new mongoose.Schema({
     qrCode: {
       type: String, // base64 (required for pix)
     },
+    pixCode: {
+      type: String, // pix copy-paste code (required for pix)
+    },
     totalAmount: {
       type: Number,
       required: true,
     },
-    required: true,
   },
   items: [
     {
