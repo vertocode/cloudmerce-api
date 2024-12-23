@@ -1,9 +1,9 @@
 import Cart from '../models/Cart'
 import { Types } from 'mongoose'
 import Product from '../models/Product'
-import Stripe from 'stripe'
 import dotenv from 'dotenv'
 import Order from '../models/Order'
+import { createPayment, ICreatePayment } from './payment'
 
 dotenv.config()
 
@@ -11,7 +11,6 @@ const apiKey = process.env.STRIPE_API_KEY || ''
 if (!apiKey) {
   throw new Error('Stripe API key not found.')
 }
-const stripe = new Stripe(apiKey)
 
 export const createCart = async (ecommerceId: string) => {
   const newCart = new Cart({
@@ -236,40 +235,56 @@ interface ICreateOrder {
   cartId: Types.ObjectId
   userId: Types.ObjectId
   ecommerceId: string
-  paymentIntentId: string
+  paymentData: ICreatePayment
 }
 
 export const createOrder = async ({
   cartId,
   userId,
   ecommerceId,
-  paymentIntentId,
+  paymentData,
 }: ICreateOrder) => {
+  console.log(`searching cart with id "${cartId}" to create a new order`)
   const cart = await Cart.findById({ _id: cartId, ecommerceId }).populate(
     'items.productId'
   )
+
   if (!cart) {
     throw new Error('Carrinho não encontrado.')
   }
 
-  const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
-  if (paymentIntent.status !== 'succeeded') {
-    throw new Error('O pagamento não foi concluído com sucesso.')
+  console.log('cart found:', cart)
+
+  console.log('creating payment for order...')
+  const paymentResponse = await createPayment(paymentData)
+  console.log('payment created successfully.')
+
+  const { point_of_interaction } = paymentResponse || {}
+  if (!paymentResponse || !point_of_interaction?.qr_code_base64) {
+    console.error('qr code missing in the response:', paymentResponse)
+    throw new Error('QR Code not found in payment response.')
   }
 
+  console.log('creating new order...')
   const newOrder = new Order({
     userId,
     ecommerceId,
     items: cart.items,
-    totalAmount: paymentIntent.amount_received,
-    paymentMethod: 'card',
-    paymentIntentId,
-    status: 'paid',
+    paymentData: {
+      type: 'pix', // TOOD: Integrate other payment types
+      totalAmount: paymentData.totalAmount,
+      qrCode: point_of_interaction?.qr_code_base64 as string,
+    },
+    status: 'pending',
   })
 
   await newOrder.save()
 
+  console.log('order created:', newOrder)
+  console.log('deleting cart...')
+
   await Cart.findByIdAndDelete(cartId)
+  console.log('cart deleted:', cart)
 
   return newOrder
 }

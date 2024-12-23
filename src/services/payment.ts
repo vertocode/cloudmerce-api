@@ -18,6 +18,8 @@ const client = new MercadoPagoConfig({
 
 export interface ICreatePayment {
   description: string
+  paymentMethod: 'pix'
+  totalAmount: number
   payer: {
     email: string
   }
@@ -42,7 +44,7 @@ export const createPayment = async (params: ICreatePayment) => {
   const payment = new Payment(client)
 
   const body = {
-    transaction_amount: 10.0,
+    transaction_amount: 10.0, // Each 1 is 1 BRL
     // transactions: { // TODO: Split later
     //   payments: [
     //     {

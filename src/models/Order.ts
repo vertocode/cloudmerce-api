@@ -12,13 +12,19 @@ export const orderSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
   },
-  paymentIntentId: {
-    type: String,
+  paymentData: {
+    type: {
+      type: String,
+      enum: ['pix', 'card'],
+    },
+    qrCode: {
+      type: String, // base64 (required for pix)
+    },
+    totalAmount: {
+      type: Number,
+      required: true,
+    },
     required: true,
-  },
-  paymentMethod: {
-    type: String,
-    enum: ['pix', 'card'],
   },
   items: [
     {
