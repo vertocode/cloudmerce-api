@@ -39,12 +39,12 @@ const validateParams = (body: Partial<ICreatePayment>) => {
 
 export const createPayment = async (params: ICreatePayment) => {
   validateParams(params)
-  const { description, payer } = params
+  const { description, payer, totalAmount } = params
 
   const payment = new Payment(client)
 
   const body = {
-    transaction_amount: 10.0, // Each 1 is 1 BRL
+    transaction_amount: totalAmount, // Each 1 is 1 BRL
     // transactions: { // TODO: Split later
     //   payments: [
     //     {
