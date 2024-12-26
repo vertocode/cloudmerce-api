@@ -3,8 +3,7 @@ import { Types } from 'mongoose'
 import Product from '../models/Product'
 import dotenv from 'dotenv'
 import Order from '../models/Order'
-import { createPayment, ICreatePayment } from './payment'
-import { PointOfInteraction } from 'mercadopago/dist/clients/payment/commonTypes'
+import { createPayment, getPayment, ICreatePayment } from './payment'
 
 dotenv.config()
 
@@ -206,6 +205,7 @@ interface IGetCart {
 }
 
 export const getCart = async ({ cartId, ecommerceId }: IGetCart) => {
+  console.log(`getting cart with id: ${cartId}`)
   const cart = await Cart.findById({ _id: cartId, ecommerceId }).populate({
     path: 'items.productId',
     strictPopulate: false,
@@ -213,6 +213,7 @@ export const getCart = async ({ cartId, ecommerceId }: IGetCart) => {
   if (!cart) {
     throw new Error('Carrinho não encontrado.')
   }
+  console.log(`found cart with id ${cartId}`)
 
   return cart
 }
