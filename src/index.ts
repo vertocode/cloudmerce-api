@@ -30,7 +30,7 @@ import {
   getWhitelabelByBaseUrl,
   updateWhitelabelById,
 } from './services/whitelabel'
-import { createPayment, ICreatePayment } from './services/payment'
+import { createPayment, getPayment, ICreatePayment } from './services/payment'
 
 dotenv.config()
 
@@ -529,6 +529,20 @@ app.put('/whitelabel/:id', async (req, res: Response): Promise<void> => {
     const errorMessage = `Error updating whitelabel: ${error}`
     console.error(errorMessage)
     res.status(500).send({ error: errorMessage })
+  }
+})
+
+app.get('/get-payment/:id', async (req, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params
+    const response = await getPayment(id)
+    res.status(200).send(response)
+  } catch (e) {
+    console.error(e)
+    res.status(500).send({
+      error: 'Erro ao buscar o pagamento.',
+      code: 'error',
+    })
   }
 })
 

@@ -67,3 +67,9 @@ export const createPayment = async (params: ICreatePayment) => {
 
   return payment.create({ body, requestOptions })
 }
+
+export const getPayment = async (paymentId: string) => {
+  const payment = new Payment(client)
+
+  return payment.get({ id: paymentId })
+}
