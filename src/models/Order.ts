@@ -13,6 +13,10 @@ export const orderSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
   },
   paymentData: {
+    id: {
+      type: String,
+      required: true,
+    },
     type: {
       type: String,
       enum: ['pix', 'card'],

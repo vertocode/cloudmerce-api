@@ -260,6 +260,11 @@ export const createOrder = async ({
   const paymentResponse = await createPayment(paymentData)
   console.log('payment created successfully.')
 
+  if (!paymentResponse || !paymentResponse?.id) {
+    console.error('payment response missing id:', paymentResponse)
+    throw new Error('Payment response not found.')
+  }
+
   const { point_of_interaction: { transaction_data = null } = {} } =
     paymentResponse || {}
   if (!transaction_data?.qr_code_base64) {
@@ -273,6 +278,7 @@ export const createOrder = async ({
     ecommerceId,
     items: cart.items,
     paymentData: {
+      id: paymentResponse.id,
       type: 'pix', // TOOD: Integrate other payment types
       totalAmount: paymentData.totalAmount,
       qrCode: transaction_data.qr_code_base64,
