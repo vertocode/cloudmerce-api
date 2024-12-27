@@ -211,7 +211,8 @@ export const getCart = async ({ cartId, ecommerceId }: IGetCart) => {
     strictPopulate: false,
   })
   if (!cart) {
-    throw new Error('Carrinho não encontrado.')
+    console.log(`cart not found with id ${cartId}`)
+    return { message: 'Carrinho não encontrado', code: 'cart_not_found' }
   }
   console.log(`found cart with id ${cartId}`)
 

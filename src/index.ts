@@ -319,7 +319,12 @@ app.get('/get-cart/:ecommerceId', async (req, res: Response): Promise<void> => {
       cartId: cartId as unknown as Types.ObjectId,
       ecommerceId,
     })
-    if (!response._id) {
+    if ((response as { code: string })?.code === 'cart_not_found') {
+      res.status(200).send(response)
+      return
+    }
+
+    if (!(response as { _id: string })?._id) {
       throw new Error('Fail to get _id in the response.')
     }
     res.status(200).send(response)
