@@ -13,6 +13,7 @@ interface ProductTypeData extends Document {
   name: string
   createdAt?: Date
   updatedAt?: Date
+  icon?: string
 }
 
 interface ProductData extends Document {
@@ -33,6 +34,7 @@ interface ProductData extends Document {
 export async function addProductType(data: {
   ecommerceId: number
   name: string
+  icon: string
 }) {
   const existingProductType = await ProductType.findOne({ name: data.name })
   if (existingProductType) {
@@ -88,7 +90,8 @@ export async function updateProductTypes({
           }
           return addProductType({
             ecommerceId: productType.ecommerceId,
-            name: productType.name!,
+            name: productType.name,
+            icon: productType?.icon || '',
           })
         case 'update':
           if (
@@ -99,7 +102,8 @@ export async function updateProductTypes({
             throw new Error('name and id is required for update action.')
           }
           return updateProductType(productType.id, productType.ecommerceId, {
-            name: productType.name!,
+            name: productType.name,
+            icon: productType?.icon || '',
           })
         case 'delete':
           if (!productType.id || !productType.ecommerceId) {

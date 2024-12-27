@@ -125,11 +125,15 @@ app.post('/users', async (req, res: Response): Promise<void> => {
 
 app.post('/product-types', async (req, res: Response): Promise<void> => {
   try {
-    const { ecommerceId, name } = req.body
+    const { ecommerceId, name, icon } = req.body
     if (!ecommerceId || !name) {
       throw new Error('Invalid body, ecommerceId and name are required.')
     }
-    const response = await addProductType({ ecommerceId, name })
+    const response = await addProductType({
+      ecommerceId,
+      name,
+      icon: icon || '',
+    })
     res.status(201).send(response)
   } catch (error) {
     const errorMessage = `Error adding product type: ${error}`

@@ -31,5 +31,6 @@ export interface UpdateProductTypesParams {
     id?: Types.ObjectId // required for update, and delete
     name?: string // required for add, and update
     ecommerceId: number // required for all
+    icon?: string
   }[]
 }
