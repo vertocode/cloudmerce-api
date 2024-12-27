@@ -3,7 +3,7 @@ import { Types } from 'mongoose'
 import Product from '../models/Product'
 import dotenv from 'dotenv'
 import Order from '../models/Order'
-import { createPayment, getPayment, ICreatePayment } from './payment'
+import { createPayment, ICreatePayment } from './payment'
 
 dotenv.config()
 

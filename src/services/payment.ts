@@ -19,7 +19,7 @@ const client = new MercadoPagoConfig({
 export interface ICreatePayment {
   description: string
   paymentMethod: 'pix'
-  totalAmount: number
+  totalAmount: string
   payer: {
     email: string
   }
@@ -38,13 +38,14 @@ const validateParams = (body: Partial<ICreatePayment>) => {
 }
 
 export const createPayment = async (params: ICreatePayment) => {
+  console.log('Creating payment with params:', params)
   validateParams(params)
   const { description, payer, totalAmount } = params
 
   const payment = new Payment(client)
 
   const body = {
-    transaction_amount: totalAmount, // Each 1 is 1 BRL
+    transaction_amount: Number(totalAmount), // Each 1 is 1 BRL
     // transactions: { // TODO: Split later
     //   payments: [
     //     {
@@ -65,7 +66,11 @@ export const createPayment = async (params: ICreatePayment) => {
 
   const requestOptions = {}
 
-  return payment.create({ body, requestOptions })
+  const paymentResponse = await payment.create({ body, requestOptions })
+
+  console.log(`Payment created id: ${paymentResponse.id}`)
+
+  return paymentResponse
 }
 
 export const getPayment = async (paymentId: string) => {
