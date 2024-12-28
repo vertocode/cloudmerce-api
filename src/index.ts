@@ -163,6 +163,7 @@ app.put(
               ? new mongoose.Types.ObjectId(productType.id)
               : undefined,
             name: productType?.name,
+            icon: productType?.icon,
             ecommerceId: productType?.ecommerceId,
           }
         }),
