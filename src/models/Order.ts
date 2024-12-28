@@ -7,7 +7,7 @@ export const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['paid', 'pending', 'finished'],
+    enum: ['pending', 'paid', 'product_sent', 'finished'],
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,

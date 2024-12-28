@@ -23,7 +23,11 @@ import {
 } from './services/cart'
 import { Types } from 'mongoose'
 import { setUserData } from './services/checkout'
-import { getOrderById, getOrdersByUserId } from './services/order'
+import {
+  changeOrderStatus,
+  getOrderById,
+  getOrdersByUserId,
+} from './services/order'
 import { IWhitelabel } from './types/Whitelabel'
 import {
   createWhitelabel,
@@ -564,6 +568,20 @@ app.post('/create-payment', async (req, res: Response): Promise<void> => {
     console.error(e)
     res.status(500).send({
       error: 'Erro ao realizar o pagamento.',
+      code: 'error',
+    })
+  }
+})
+
+app.put('/update-order-status', async (req, res: Response): Promise<void> => {
+  const body = req.body as { orderId: string; status: string }
+  try {
+    const response = await changeOrderStatus(body)
+    res.status(200).send(response)
+  } catch (e) {
+    console.error(e)
+    res.status(500).send({
+      error: 'Erro ao atualizar o status do pedido.',
       code: 'error',
     })
   }

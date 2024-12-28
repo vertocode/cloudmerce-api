@@ -57,34 +57,59 @@ export const getOrdersByUserId = async ({
   userId,
   ecommerceId,
 }: IGetOrdersByUserId) => {
-  try {
-    console.log('Valor do userId:', userId)
+  console.log('Valor do userId:', userId)
 
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      throw new Error('userId inválido')
-    }
-
-    const objectIdUser = new mongoose.Types.ObjectId(userId)
-
-    console.log(
-      'Consultando pedidos com userId:',
-      objectIdUser,
-      'ecommerceId:',
-      ecommerceId
-    )
-
-    const orders = await Order.find({
-      userId: objectIdUser,
-      ecommerceId,
-    }).populate('items.productId')
-
-    if (!orders || orders.length === 0) {
-      console.log('Nenhum pedido encontrado para esse userId e ecommerceId')
-    }
-
-    return orders || []
-  } catch (err) {
-    console.error(err)
-    throw new Error('Erro ao buscar pedidos')
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new Error('userId inválido')
   }
+
+  const objectIdUser = new mongoose.Types.ObjectId(userId)
+
+  console.log(
+    'Consultando pedidos com userId:',
+    objectIdUser,
+    'ecommerceId:',
+    ecommerceId
+  )
+
+  const orders = await Order.find({
+    userId: objectIdUser,
+    ecommerceId,
+  }).populate('items.productId')
+
+  if (!orders || orders.length === 0) {
+    console.log('Nenhum pedido encontrado para esse userId e ecommerceId')
+  }
+
+  return orders || []
+}
+
+export const changeOrderStatus = async ({
+  orderId,
+  status,
+}: {
+  orderId: string
+  status: string
+}) => {
+  const availableStatuses = ['pending', 'paid', 'product_sent', 'finished']
+  if (!status || !availableStatuses.includes(status)) {
+    throw new Error(
+      `Invalid status: ${status}. Available statuses: ${availableStatuses.join(', ')}`
+    )
+  }
+
+  console.log(
+    `changing order status to ${status} for order with id: ${orderId}`
+  )
+  const order = await Order.findById(orderId)
+  if (!order) {
+    throw new Error('Order not found.')
+  }
+
+  order.status = status as (typeof order)['status']
+
+  await order.save()
+  console.log(`order status changed to ${status}`)
+
+  return order
 }
