@@ -23,6 +23,9 @@ export interface IWhitelabel {
     cpf?: string | null
     other?: string | null
   } | null
+  paymentData?: {
+    mercadopagoId?: string | null
+  }
   createdAt?: Date
   updatedAt?: Date
 }

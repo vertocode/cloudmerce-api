@@ -18,8 +18,7 @@ export const createWhitelabel = async (whitelabelData: IWhitelabel) => {
     if (whitelabel && whitelabel?.length) {
       return { code: 409, message: 'Whitelabel already exists' }
     }
-    whitelabelData.baseUrl = baseUrl
-    return await Whitelabel.create(whitelabelData)
+    return await Whitelabel.create({ ...whitelabelData, baseUrl })
   } catch (error) {
     console.error('Error creating whitelabel:', error)
     throw error
@@ -33,6 +32,7 @@ export const getWhitelabelByBaseUrl = async (
     const baseUrl = getUrlByHost(baseHost)
     const whitelabel = await Whitelabel.find({ baseUrl })
     if (!whitelabel || !whitelabel?.length) {
+      console.log('Whitelabel not found:', baseUrl, whitelabel)
       return { code: 404, message: 'Whitelabel not found' }
     }
     if (whitelabel.length > 1) {
@@ -42,7 +42,18 @@ export const getWhitelabelByBaseUrl = async (
         message: `More than one whitelabel found with baseUrl: ${baseUrl}`,
       }
     }
-    return whitelabel.at(0)
+    const data = whitelabel.at(0)
+    return {
+      banner: data?.banner || null,
+      socialMedia: data?.socialMedia || null,
+      _id: data?._id || null,
+      name: data?.name || null,
+      description: data?.description || null,
+      primaryColor: data?.primaryColor || null,
+      secondaryColor: data?.secondaryColor || null,
+      logoUrl: data?.logoUrl || null,
+      productTypes: data?.productTypes || [],
+    }
   } catch (error) {
     console.error('Error getting whitelabel:', error)
     throw error

@@ -471,6 +471,7 @@ app.post('/whitelabel', async (req, res: Response): Promise<void> => {
       productTypes,
       socialMedia,
       pixKey,
+      paymentData,
     } = req.body
 
     if (!baseUrl || !name) {
@@ -491,6 +492,7 @@ app.post('/whitelabel', async (req, res: Response): Promise<void> => {
       productTypes,
       socialMedia,
       pixKey,
+      paymentData,
     }
 
     const newWhitelabel = await createWhitelabel(whitelabelData)
@@ -513,6 +515,17 @@ app.get('/whitelabel/:baseUrl', async (req, res: Response): Promise<void> => {
       })
       return
     }
+
+    // const authorizationHeader = req.headers['authorization']
+
+    // console.log('authorizationHeader', authorizationHeader)
+
+    // if (!authorizationHeader) {
+    //   res.status(401).send({
+    //     error: 'Authorization header is missing.',
+    //   })
+    //   return
+    // }
 
     const whitelabel = await getWhitelabelByBaseUrl(baseUrl)
 

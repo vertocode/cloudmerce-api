@@ -73,6 +73,13 @@ export const whitelabelSchema = new mongoose.Schema({
       required: false,
     },
   },
+  paymentData: {
+    mercadopagoId: {
+      type: String,
+      required: false,
+      default: null,
+    },
+  },
   createdAt: {
     type: Date,
     default: Date.now,
