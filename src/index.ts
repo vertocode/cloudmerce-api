@@ -516,17 +516,6 @@ app.get('/whitelabel/:baseUrl', async (req, res: Response): Promise<void> => {
       return
     }
 
-    // const authorizationHeader = req.headers['authorization']
-
-    // console.log('authorizationHeader', authorizationHeader)
-
-    // if (!authorizationHeader) {
-    //   res.status(401).send({
-    //     error: 'Authorization header is missing.',
-    //   })
-    //   return
-    // }
-
     const whitelabel = await getWhitelabelByBaseUrl(baseUrl)
 
     res.status(200).send(whitelabel)
@@ -536,6 +525,30 @@ app.get('/whitelabel/:baseUrl', async (req, res: Response): Promise<void> => {
     res.status(500).send({ error: errorMessage })
   }
 })
+
+app.get(
+  '/whitelabel/payment-data/:baseUrl',
+  async (req, res: Response): Promise<void> => {
+    try {
+      const { baseUrl } = req.params
+
+      if (!baseUrl) {
+        res.status(400).send({
+          error: 'Invalid request, whitelabel baseUrl is required.',
+        })
+        return
+      }
+
+      const whitelabel = await getWhitelabelByBaseUrl(baseUrl, true)
+
+      res.status(200).send(whitelabel.paymentData)
+    } catch (error) {
+      const errorMessage = `Error getting whitelabel: ${error}`
+      console.error(errorMessage)
+      res.status(500).send({ error: errorMessage })
+    }
+  }
+)
 
 app.put('/whitelabel/:id', async (req, res: Response): Promise<void> => {
   try {

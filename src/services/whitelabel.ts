@@ -26,7 +26,8 @@ export const createWhitelabel = async (whitelabelData: IWhitelabel) => {
 }
 
 export const getWhitelabelByBaseUrl = async (
-  baseHost: string
+  baseHost: string,
+  withPayment: boolean = false
 ): Promise<any> => {
   try {
     const baseUrl = getUrlByHost(baseHost)
@@ -53,6 +54,7 @@ export const getWhitelabelByBaseUrl = async (
       secondaryColor: data?.secondaryColor || null,
       logoUrl: data?.logoUrl || null,
       productTypes: data?.productTypes || [],
+      ...(withPayment && { paymentData: data?.paymentData || null }),
     }
   } catch (error) {
     console.error('Error getting whitelabel:', error)
@@ -65,6 +67,7 @@ export const updateWhitelabelById = async (
   whitelabelData: Partial<IWhitelabel>
 ): Promise<any> => {
   try {
+    console.log('editing whitelabel:', id, whitelabelData)
     const whitelabel = await Whitelabel.findById(id)
 
     if (!whitelabel) {
@@ -73,8 +76,12 @@ export const updateWhitelabelById = async (
 
     Object.keys(whitelabelData).forEach((key: string) => {
       if (whitelabelData[key as keyof IWhitelabel] !== undefined) {
-        // @ts-ignore
-        whitelabel[key] = whitelabelData[key as keyof IWhitelabel]
+        if (key === 'baseUrl') {
+          whitelabel.baseUrl = getUrlByHost(whitelabelData.baseUrl as string)
+        } else {
+          // @ts-ignore
+          whitelabel[key] = whitelabelData[key as keyof IWhitelabel]
+        }
       }
     })
 
