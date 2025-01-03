@@ -592,9 +592,17 @@ app.put('/update-order-status', async (req, res: Response): Promise<void> => {
 })
 
 app.post('/mp-oauth-token', async (req, res: Response): Promise<void> => {
-  const body = req.body as OAuthParams
+  const body = req.body as OAuthParams & { whitelabelId: string }
   try {
     const response = await oauth(body)
+    await updateWhitelabelById(body.whitelabelId, {
+      mp: {
+        accessToken: response.access_token,
+        refreshToken: response.refresh_token,
+        userId: response.user_id,
+        publicKey: response.public_key,
+      },
+    })
     res.status(200).send(response)
   } catch (err) {
     console.error(err)

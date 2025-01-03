@@ -1,17 +1,21 @@
 import axios from 'axios'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 export interface OAuthParams {
-  clientId: string
-  clientSecret: string
   authorizationCode: string
   redirectUri: string
   state: string
 }
 
 export const oauth = async (params: OAuthParams) => {
-  const { clientId, clientSecret, authorizationCode, redirectUri, state } =
-    params
+  const { authorizationCode, redirectUri, state } = params
 
+  const clientId = process.env.MERCADO_PAGO_CLIENT_ID
+  const clientSecret = process.env.MERCADO_PAGO_CLIENT_SECRET
+
+  console.log('checking params for oauth with mercado pago')
   if (
     !clientId ||
     !clientSecret ||
@@ -30,6 +34,8 @@ export const oauth = async (params: OAuthParams) => {
   data.append('redirect_uri', redirectUri)
   data.append('state', state)
 
+  console.log('making oauth request with mercado pago')
+
   try {
     const response = await axios.post(
       'https://api.mercadopago.com/oauth/token',
@@ -41,6 +47,8 @@ export const oauth = async (params: OAuthParams) => {
         },
       }
     )
+
+    console.log('success with oauth request:', response.data)
 
     return response.data
   } catch (error) {

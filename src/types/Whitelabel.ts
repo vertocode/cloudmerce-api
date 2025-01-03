@@ -23,8 +23,11 @@ export interface IWhitelabel {
     cpf?: string | null
     other?: string | null
   } | null
-  paymentData?: {
-    mercadopagoId?: string | null
+  mp?: {
+    accessToken: string
+    refreshToken: string
+    userId: string
+    publicKey: string
   }
   createdAt?: Date
   updatedAt?: Date
