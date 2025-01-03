@@ -26,8 +26,7 @@ export const createWhitelabel = async (whitelabelData: IWhitelabel) => {
 }
 
 export const getWhitelabelByBaseUrl = async (
-  baseHost: string,
-  withPayment: boolean = false
+  baseHost: string
 ): Promise<any> => {
   try {
     const baseUrl = getUrlByHost(baseHost)
@@ -54,7 +53,7 @@ export const getWhitelabelByBaseUrl = async (
       secondaryColor: data?.secondaryColor || null,
       logoUrl: data?.logoUrl || null,
       productTypes: data?.productTypes || [],
-      ...(withPayment && { paymentData: data?.paymentData || null }),
+      hasMP: !!data?.mp?.accessToken,
     }
   } catch (error) {
     console.error('Error getting whitelabel:', error)
