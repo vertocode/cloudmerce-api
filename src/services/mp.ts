@@ -23,6 +23,11 @@ export const oauth = async (params: OAuthParams) => {
     !redirectUri ||
     !state
   ) {
+    console.log('clientId', clientId)
+    console.log('clientSecret', clientSecret)
+    console.log('authorizationCode', authorizationCode)
+    console.log('redirectUri', redirectUri)
+    console.log('state', state)
     throw new Error('Missing required parameters')
   }
 

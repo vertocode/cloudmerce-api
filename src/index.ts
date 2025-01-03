@@ -493,7 +493,6 @@ app.post('/whitelabel', async (req, res: Response): Promise<void> => {
       productTypes,
       socialMedia,
       pixKey,
-      paymentData,
     }
 
     const newWhitelabel = await createWhitelabel(whitelabelData)
