@@ -4,6 +4,7 @@ import Product from '../models/Product'
 import dotenv from 'dotenv'
 import Order from '../models/Order'
 import { createPayment, ICreatePayment } from './payment'
+import Whitelabel from '../models/Whitelabel'
 
 dotenv.config()
 
@@ -258,8 +259,19 @@ export const createOrder = async ({
 
   console.log('cart found:', cart)
 
+  console.log('getting the seller access token...')
+  const whitelabel = await Whitelabel.findById(ecommerceId)
+
+  if (!whitelabel) {
+    console.error('whitelabel not found:', whitelabel)
+    throw new Error('Whitelabel not found.')
+  }
+
   console.log('creating payment for order...')
-  const paymentResponse = await createPayment(paymentData)
+  const paymentResponse = await createPayment({
+    ...paymentData,
+    sellerAccessToken: whitelabel?.mp?.accessToken || '',
+  })
   console.log('payment created successfully.')
 
   if (!paymentResponse || !paymentResponse?.id) {

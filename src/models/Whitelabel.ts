@@ -73,11 +73,22 @@ export const whitelabelSchema = new mongoose.Schema({
       required: false,
     },
   },
-  paymentData: {
-    mercadopagoId: {
+  mp: {
+    accessToken: {
       type: String,
       required: false,
-      default: null,
+    },
+    refreshToken: {
+      type: String,
+      required: false,
+    },
+    userId: {
+      type: String,
+      required: false,
+    },
+    publicKey: {
+      type: String,
+      required: false,
     },
   },
   createdAt: {

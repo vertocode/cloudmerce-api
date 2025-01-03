@@ -35,6 +35,7 @@ import {
   updateWhitelabelById,
 } from './services/whitelabel'
 import { createPayment, getPayment, ICreatePayment } from './services/payment'
+import { oauth, OAuthParams } from './services/mp'
 
 dotenv.config()
 
@@ -609,6 +610,20 @@ app.put('/update-order-status', async (req, res: Response): Promise<void> => {
     console.error(e)
     res.status(500).send({
       error: 'Erro ao atualizar o status do pedido.',
+      code: 'error',
+    })
+  }
+})
+
+app.post('/mp-oauth-token', async (req, res: Response): Promise<void> => {
+  const body = req.body as OAuthParams
+  try {
+    const response = await oauth(body)
+    res.status(200).send(response)
+  } catch (err) {
+    console.error(err)
+    res.status(500).send({
+      error: 'Erro ao buscar o token de acesso do Mercado Pago.',
       code: 'error',
     })
   }
