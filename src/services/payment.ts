@@ -64,16 +64,18 @@ export const createPayment = async (params: ICreatePayment) => {
     description,
     payment_method_id: 'pix',
     payer,
+    binary_mode: true,
     // marketplace_fee: cloudmerceAmount,
     // collector_id: sellerAccessToken || accessToken, // Access token from the seller, if not defined, the payment will be created with 100% for cloudmerce account
     sponsor_id: Number(sellerAccessToken.split('-').pop()), // Seller ID
     application_fee: sellerAmount,
-    marketplace: sellerAccessToken,
+    // marketplace: sellerAccessToken,
     additional_info: {
       items: [
         {
           id: 'seller-1',
           title: description,
+          description,
           unit_price: totalAmountNumber,
           quantity: 1,
         },
