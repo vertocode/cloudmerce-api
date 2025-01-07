@@ -36,7 +36,11 @@ import {
 } from './services/whitelabel'
 import { createPayment, getPayment, ICreatePayment } from './services/payment'
 import { oauth, OAuthParams } from './services/mp'
-import { createCustomer } from './services/asaas'
+import {
+  createCustomer,
+  createPixQRCode,
+  ICreatePixQRCode,
+} from './services/asaas'
 
 dotenv.config()
 
@@ -624,6 +628,23 @@ app.post(
       console.error(e)
       res.status(500).send({
         error: 'Error to create customer in asaas.',
+        code: 'error',
+      })
+    }
+  }
+)
+
+app.post(
+  '/create-asaas-pix-qrcode',
+  async (req, res: Response): Promise<void> => {
+    const body = req.body as ICreatePixQRCode
+    try {
+      const response = await createPixQRCode(body)
+      res.status(200).send(response)
+    } catch (e) {
+      console.error(e)
+      res.status(500).send({
+        error: 'Error to create pix qrcode in asaas.',
         code: 'error',
       })
     }

@@ -8,11 +8,6 @@ import Whitelabel from '../models/Whitelabel'
 
 dotenv.config()
 
-const apiKey = process.env.STRIPE_API_KEY || ''
-if (!apiKey) {
-  throw new Error('Stripe API key not found.')
-}
-
 export const createCart = async (ecommerceId: string) => {
   const newCart = new Cart({
     ecommerceId,
