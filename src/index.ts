@@ -36,6 +36,7 @@ import {
 } from './services/whitelabel'
 import { createPayment, getPayment, ICreatePayment } from './services/payment'
 import { oauth, OAuthParams } from './services/mp'
+import { createCustomer } from './services/asaas'
 
 dotenv.config()
 
@@ -611,6 +612,23 @@ app.post('/mp-oauth-token', async (req, res: Response): Promise<void> => {
     })
   }
 })
+
+app.post(
+  '/create-asaas-customer',
+  async (req, res: Response): Promise<void> => {
+    const body = req.body as { name: string; cpfCnpj: string }
+    try {
+      const response = await createCustomer(body)
+      res.status(200).send(response)
+    } catch (e) {
+      console.error(e)
+      res.status(500).send({
+        error: 'Error to create customer in asaas.',
+        code: 'error',
+      })
+    }
+  }
+)
 
 app.listen(port, (): void => {
   console.log(`Cloudmerce API running on port: ${port}`)
