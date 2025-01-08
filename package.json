@@ -28,6 +28,7 @@
     "axios": "^1.7.9",
     "concurrently": "^8.2.1",
     "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
     "eslint": "^9.16.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",

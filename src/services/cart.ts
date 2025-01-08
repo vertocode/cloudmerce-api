@@ -5,13 +5,11 @@ import dotenv from 'dotenv'
 import Order from '../models/Order'
 import { createPayment, ICreatePayment } from './payment'
 import Whitelabel from '../models/Whitelabel'
+import { createCustomer, createPixQRCode } from './asaas'
+import User from '../models/User'
+import { addMonths } from 'date-fns'
 
 dotenv.config()
-
-const apiKey = process.env.STRIPE_API_KEY || ''
-if (!apiKey) {
-  throw new Error('Stripe API key not found.')
-}
 
 export const createCart = async (ecommerceId: string) => {
   const newCart = new Cart({
@@ -239,7 +237,9 @@ interface ICreateOrder {
   cartId: Types.ObjectId
   userId: Types.ObjectId
   ecommerceId: string
-  paymentData: ICreatePayment
+  paymentData: {
+    totalAmount: number
+  }
 }
 
 export const createOrder = async ({
@@ -259,29 +259,70 @@ export const createOrder = async ({
 
   console.log('cart found:', cart)
 
-  console.log('getting the seller access token...')
-  const whitelabel = await Whitelabel.findById(ecommerceId)
+  // console.log('getting the seller access token...')
+  // const whitelabel = await Whitelabel.findById(ecommerceId)
+  //
+  // if (!whitelabel) {
+  //   console.error('whitelabel not found:', whitelabel)
+  //   throw new Error('Whitelabel not found.')
+  // }
 
-  if (!whitelabel) {
-    console.error('whitelabel not found:', whitelabel)
-    throw new Error('Whitelabel not found.')
+  console.log(`getting the user data by id: ${userId}`)
+  const userData = await User.findById(userId)
+
+  if (!userData) {
+    console.error('user not found:', userData)
+    throw new Error('User not found.')
+  }
+  console.log('user found:', userData)
+
+  console.log('creating customer in asaas...')
+
+  if (!userData.name || !userData.email || !userData.cpf || !userData.phone) {
+    console.error('missing user data:', userData)
+    throw new Error('Missing user data.')
+  }
+
+  const customerResponse = await createCustomer({
+    name: userData.name,
+    email: userData.email,
+    cpfCnpj: userData.cpf,
+    phone: userData.phone,
+  })
+
+  if (!customerResponse || !customerResponse.id) {
+    console.error('customer response missing id:', customerResponse)
+    throw new Error('Customer response not found.')
   }
 
   console.log('creating payment for order...')
-  const paymentResponse = await createPayment({
-    ...paymentData,
-    sellerAccessToken: whitelabel?.mp?.accessToken || '',
+  const paymentResponse = await createPixQRCode({
+    customer: customerResponse.id,
+    value: paymentData.totalAmount,
+    dueDate: addMonths(new Date(), 6).toISOString(),
   })
   console.log('payment created successfully.')
 
-  if (!paymentResponse || !paymentResponse?.id) {
-    console.error('payment response missing id:', paymentResponse)
+  if (!paymentResponse || !paymentResponse?.billing?.id) {
+    console.error('payment response missing billing id:', paymentResponse)
     throw new Error('Payment response not found.')
   }
 
-  const { point_of_interaction: { transaction_data = null } = {} } =
-    paymentResponse || {}
-  if (!transaction_data?.qr_code_base64) {
+  if (!paymentResponse.pix) {
+    console.error('pix data missing in the response:', paymentResponse)
+    throw new Error('Pix data not found in payment response')
+  }
+
+  const { payload: copyPasteCode, encodedImage: qrCodeBase64 } =
+    (paymentResponse.pix as unknown as {
+      payload: string
+      encodedImage: string
+    }) || {
+      payload: '',
+      encodedImage: '',
+    }
+
+  if (!qrCodeBase64) {
     console.error('qr code missing in the response:', paymentResponse)
     throw new Error('QR Code not found in payment response.')
   }
@@ -292,11 +333,11 @@ export const createOrder = async ({
     ecommerceId,
     items: cart.items,
     paymentData: {
-      id: paymentResponse.id,
+      id: paymentResponse.billing.id,
       type: 'pix', // TOOD: Integrate other payment types
       totalAmount: paymentData.totalAmount,
-      qrCode: transaction_data.qr_code_base64,
-      pixCode: transaction_data.qr_code,
+      qrCode: qrCodeBase64,
+      pixCode: copyPasteCode,
     },
     status: 'pending',
   })
