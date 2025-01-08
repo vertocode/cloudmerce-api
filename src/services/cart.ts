@@ -288,6 +288,7 @@ export const createOrder = async ({
     email: userData.email,
     cpfCnpj: userData.cpf,
     phone: userData.phone,
+    notificationDisabled: true,
   })
 
   if (!customerResponse || !customerResponse.id) {

@@ -19,6 +19,7 @@ interface CustomerRequest {
   email?: string
   phone?: string
   cpfCnpj: string
+  notificationDisabled?: boolean
 }
 
 interface CustomerResponse {
