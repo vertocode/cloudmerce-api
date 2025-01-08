@@ -4,13 +4,13 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const accessToken = process.env.ASAAS_ACCESS_TOKEN || ''
-const apiURL = `${process.env.ASAAS_API_URL}/api/v3`
+const apiURL = process.env.ASAAS_API_URL || ''
 
 if (!accessToken) {
   throw new Error('Asaas access token not found.')
 }
 
-if (!process.env.ASAAS_API_URL) {
+if (!apiURL) {
   throw new Error('Asaas API URL not found.')
 }
 
