@@ -4,7 +4,15 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const accessToken = process.env.ASAAS_ACCESS_TOKEN || ''
-const apiURL = 'https://sandbox.asaas.com/api/v3'
+const apiURL = `${process.env.ASAAS_API_URL}/api/v3`
+
+if (!accessToken) {
+  throw new Error('Asaas access token not found.')
+}
+
+if (!process.env.ASAAS_API_URL) {
+  throw new Error('Asaas API URL not found.')
+}
 
 interface CustomerRequest {
   name: string
@@ -114,10 +122,7 @@ export const createPixQRCode = async (data: ICreatePixQRCode) => {
 export const getPayment = async (paymentId: string) => {
   try {
     const response = await axios.get(`${apiURL}/payments/${paymentId}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
+      headers,
     })
 
     return response.data
