@@ -1,11 +1,15 @@
 import Order from '../models/Order'
 import mongoose from 'mongoose'
-import { getPayment } from './payment'
+import { updateOrderStatus as updateOrderStatusMP } from './mp'
+import { updateOrderStatus as updateOrderStatusAsaas } from './asaas'
 
 interface IGetOrderById {
   orderId: string
   ecommerceId: string
 }
+
+const useMercadoPage = false
+const useAsaas = true
 
 export const getOrderById = async ({ orderId, ecommerceId }: IGetOrderById) => {
   console.log(`getting order with id: ${orderId}`)
@@ -20,28 +24,12 @@ export const getOrderById = async ({ orderId, ecommerceId }: IGetOrderById) => {
   }
 
   if (order.status === 'pending') {
-    console.log(
-      'order has pending payment, checking if the payment is paid in mercadopago api...'
-    )
-    const { paymentData } = order || {}
-    const paymentId = (paymentData as unknown as { id: string })?.id
-    if (!paymentData || !paymentId) {
-      throw new Error('Não foi possível encontrar o id do pagamento')
-    }
-    const paymentResponse = await getPayment(paymentId)
-
-    if (!paymentResponse) {
-      throw new Error('Não foi possível encontrar o pagamento')
+    if (useMercadoPage) {
+      await updateOrderStatusMP(order)
     }
 
-    if (paymentResponse.status === 'approved') {
-      console.log('payment is approved, updating order status to paid')
-      order.status = 'paid'
-      await order.save()
-    } else {
-      console.log(
-        `payment is not approved, keeping order status as pending: ${paymentResponse.status}`
-      )
+    if (useAsaas) {
+      await updateOrderStatusAsaas(order)
     }
   }
 

@@ -8,6 +8,8 @@ const apiURL = 'https://sandbox.asaas.com/api/v3'
 
 interface CustomerRequest {
   name: string
+  email?: string
+  phone?: string
   cpfCnpj: string
 }
 
@@ -61,10 +63,8 @@ export const createPixQRCode = async (data: ICreatePixQRCode) => {
   try {
     console.log('Creating billing before creating the qrcode with data:', data)
     const params = {
-      customer: 'cus_000006431794',
       billingType: 'PIX',
-      value: 50,
-      dueDate: '2025-06-06',
+      ...data,
     }
     const billingResponse = await axios.post<CustomerResponse>(
       `${apiURL}/payments`,
@@ -93,12 +93,74 @@ export const createPixQRCode = async (data: ICreatePixQRCode) => {
 
     console.log('Pix QRCode created successfully:', pixResponse)
 
-    return pixResponse.data
+    return {
+      pix: pixResponse.data,
+      billing: billingResponse.data,
+    }
   } catch (error: any) {
     console.error(
       'Error creating qrcode:',
       error.response?.data || error.message
     )
     throw new Error(error.response?.data?.message || 'Failed to create qrcode')
+  }
+}
+
+/**
+ * Retrieves the payment status from the Asaas API.
+ * @param paymentId Payment ID in Asaas.
+ * @returns Payment data or throws an error if not found.
+ */
+export const getPayment = async (paymentId: string) => {
+  try {
+    const response = await axios.get(`${apiURL}/payments/${paymentId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    })
+
+    return response.data
+  } catch (error) {
+    console.error(
+      `Error fetching payment from Asaas for ID: ${paymentId}`,
+      error
+    )
+    throw new Error('Failed to fetch payment from Asaas.')
+  }
+}
+
+/**
+ * Updates the order status based on the payment status in the Asaas API.
+ * @param order The order to be updated.
+ */
+export const updateOrderStatus = async (order: any) => {
+  console.log(
+    'The order has a pending payment. Checking if the payment is approved in the Asaas API...'
+  )
+
+  const { paymentData } = order || {}
+  const paymentId = (paymentData as unknown as { id: string })?.id
+
+  if (!paymentData || !paymentId) {
+    throw new Error('Unable to find the payment ID.')
+  }
+
+  const paymentResponse = await getPayment(paymentId)
+
+  if (!paymentResponse) {
+    throw new Error('Unable to find the payment in the Asaas API.')
+  }
+
+  const paymentStatus = paymentResponse.status
+
+  if (paymentStatus === 'RECEIVED') {
+    console.log('Payment approved. Updating order status to "paid".')
+    order.status = 'paid'
+    await order.save()
+  } else {
+    console.log(
+      `Payment not approved. Keeping order status as "pending": ${paymentStatus}`
+    )
   }
 }

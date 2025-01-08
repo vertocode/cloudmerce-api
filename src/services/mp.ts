@@ -1,5 +1,6 @@
 import axios from 'axios'
 import dotenv from 'dotenv'
+import { getPayment } from './payment'
 
 dotenv.config()
 
@@ -63,5 +64,31 @@ export const oauth = async (params: OAuthParams) => {
       error?.response ? error?.response?.data : error?.message
     )
     throw new Error('Failed to obtain OAuth token')
+  }
+}
+
+export const updateOrderStatus = async (order: any) => {
+  console.log(
+    'order has pending payment, checking if the payment is paid in mercadopago api...'
+  )
+  const { paymentData } = order || {}
+  const paymentId = (paymentData as unknown as { id: string })?.id
+  if (!paymentData || !paymentId) {
+    throw new Error('Não foi possível encontrar o id do pagamento')
+  }
+  const paymentResponse = await getPayment(paymentId)
+
+  if (!paymentResponse) {
+    throw new Error('Não foi possível encontrar o pagamento')
+  }
+
+  if (paymentResponse.status === 'approved') {
+    console.log('payment is approved, updating order status to paid')
+    order.status = 'paid'
+    await order.save()
+  } else {
+    console.log(
+      `payment is not approved, keeping order status as pending: ${paymentResponse.status}`
+    )
   }
 }
