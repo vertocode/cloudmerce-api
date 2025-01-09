@@ -29,6 +29,7 @@ export const getWhitelabelByBaseUrl = async (
   baseHost: string
 ): Promise<any> => {
   try {
+    console.log('getting whitelabel by baseUrl:', baseHost)
     const baseUrl = getUrlByHost(baseHost)
     const whitelabel = await Whitelabel.find({ baseUrl })
     if (!whitelabel || !whitelabel?.length) {
@@ -43,6 +44,8 @@ export const getWhitelabelByBaseUrl = async (
       }
     }
     const data = whitelabel.at(0)
+
+    console.log('Whitelabel found with success for baseUrl:', baseUrl)
     return {
       banner: data?.banner || null,
       socialMedia: data?.socialMedia || null,
