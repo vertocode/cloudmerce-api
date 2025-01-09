@@ -105,7 +105,10 @@ export const addItemToCart = async ({
 
   await cart.save()
 
-  return cart
+  return cart.populate({
+    path: 'items.productId',
+    strictPopulate: false,
+  })
 }
 
 export const changeQuantity = async ({
