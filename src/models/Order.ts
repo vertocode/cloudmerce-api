@@ -19,7 +19,7 @@ export const orderSchema = new mongoose.Schema({
     },
     type: {
       type: String,
-      enum: ['pix', 'card'],
+      enum: ['pix', 'credit_card'],
     },
     qrCode: {
       type: String, // base64 (required for pix)

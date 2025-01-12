@@ -122,7 +122,7 @@ export interface CreditCardData {
   cardHolderName: string
   cardCpf: string
   cardNumber: string
-  cardExpirationDate: string
+  cardExpiryDate: string
   cardCvv: string
 }
 
@@ -143,18 +143,19 @@ interface ICreateCreditCardPayment {
 export const createCreditCardPayment = async (
   props: ICreateCreditCardPayment
 ): Promise<{ billing: Billing }> => {
-  const { customer, value, creditCardData, userData } = props || {}
+  const { customer, value, creditCardData, userData, dueDate } = props || {}
   try {
     console.log('Creating credit card payment with data:', props)
     const params = {
       customer,
       billingType: 'CREDIT_CARD',
       value,
+      dueDate,
       creditCard: {
         holderName: creditCardData.cardHolderName,
         number: creditCardData.cardNumber,
-        expiryMonth: creditCardData.cardExpirationDate.split('/')[0],
-        expiryYear: creditCardData.cardExpirationDate.split('/')[1],
+        expiryMonth: creditCardData.cardExpiryDate.split('/')[0],
+        expiryYear: creditCardData.cardExpiryDate.split('/')[1],
         ccv: creditCardData.cardCvv,
       },
       creditCardHolderInfo: {
@@ -168,6 +169,7 @@ export const createCreditCardPayment = async (
         mobilePhone: userData.phone,
       },
     }
+    console.log('params: ', params)
     const response = await axios.post<CustomerResponse>(
       `${apiURL}/payments`,
       params,
