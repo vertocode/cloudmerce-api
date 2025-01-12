@@ -361,7 +361,7 @@ export const createOrder = async ({
         pixCode: paymentResponse?.pix?.payload,
       }),
     },
-    status: 'pending',
+    status: paymentMethod === 'pix' ? 'pending' : 'paid',
   })
 
   await newOrder.save()
