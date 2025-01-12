@@ -1,5 +1,6 @@
 import axios from 'axios'
 import dotenv from 'dotenv'
+import { Billing, PixQRCode } from '../types/Asaas'
 
 dotenv.config()
 
@@ -68,7 +69,9 @@ export interface ICreatePixQRCode {
   dueDate: string
 }
 
-export const createPixQRCode = async (data: ICreatePixQRCode) => {
+export const createPixQRCode = async (
+  data: ICreatePixQRCode
+): Promise<{ billing: Billing; pix: PixQRCode }> => {
   try {
     console.log('Creating billing before creating the qrcode with data:', data)
     const params = {
@@ -103,8 +106,8 @@ export const createPixQRCode = async (data: ICreatePixQRCode) => {
     console.log('Pix QRCode created successfully:', pixResponse)
 
     return {
-      pix: pixResponse.data,
-      billing: billingResponse.data,
+      pix: pixResponse.data as unknown as PixQRCode,
+      billing: billingResponse.data as unknown as Billing,
     }
   } catch (error: any) {
     console.error(
@@ -112,6 +115,78 @@ export const createPixQRCode = async (data: ICreatePixQRCode) => {
       error.response?.data || error.message
     )
     throw new Error(error.response?.data?.message || 'Failed to create qrcode')
+  }
+}
+
+export interface CreditCardData {
+  cardHolderName: string
+  cardCpf: string
+  cardNumber: string
+  cardExpirationDate: string
+  cardCvv: string
+}
+
+interface ICreateCreditCardPayment {
+  customer: string
+  value: number
+  creditCardData: CreditCardData
+  userData: {
+    email: string
+    cep: string
+    addressNumber: string
+    addressComplement: string
+    phone: string
+  }
+  dueDate: string
+}
+
+export const createCreditCardPayment = async (
+  props: ICreateCreditCardPayment
+): Promise<{ billing: Billing }> => {
+  const { customer, value, creditCardData, userData } = props || {}
+  try {
+    console.log('Creating credit card payment with data:', props)
+    const params = {
+      customer,
+      billingType: 'CREDIT_CARD',
+      value,
+      creditCard: {
+        holderName: creditCardData.cardHolderName,
+        number: creditCardData.cardNumber,
+        expiryMonth: creditCardData.cardExpirationDate.split('/')[0],
+        expiryYear: creditCardData.cardExpirationDate.split('/')[1],
+        ccv: creditCardData.cardCvv,
+      },
+      creditCardHolderInfo: {
+        name: creditCardData.cardHolderName,
+        cpfCnpj: creditCardData.cardCpf,
+        email: userData.email,
+        postalCode: userData.cep,
+        addressNumber: userData.addressNumber,
+        addressComplement: userData.addressComplement,
+        phone: userData.phone,
+        mobilePhone: userData.phone,
+      },
+    }
+    const response = await axios.post<CustomerResponse>(
+      `${apiURL}/payments`,
+      params,
+      {
+        headers,
+      }
+    )
+    console.log('Credit card payment created successfully:', response.data)
+    return {
+      billing: response.data as unknown as Billing,
+    }
+  } catch (error: any) {
+    console.error(
+      'Error creating credit card payment:',
+      error.response?.data || error.message
+    )
+    throw new Error(
+      error.response?.data?.message || 'Failed to create credit card payment'
+    )
   }
 }
 

@@ -3,11 +3,15 @@ import { Types } from 'mongoose'
 import Product from '../models/Product'
 import dotenv from 'dotenv'
 import Order from '../models/Order'
-import { createPayment, ICreatePayment } from './payment'
-import Whitelabel from '../models/Whitelabel'
-import { createCustomer, createPixQRCode } from './asaas'
+import {
+  createCreditCardPayment,
+  createCustomer,
+  createPixQRCode,
+  CreditCardData,
+} from './asaas'
 import User from '../models/User'
 import { addMonths } from 'date-fns'
+import { Billing, PixQRCode } from '../types/Asaas'
 
 dotenv.config()
 
@@ -242,7 +246,15 @@ interface ICreateOrder {
   ecommerceId: string
   paymentData: {
     totalAmount: number
-  }
+  } & (
+    | {
+        paymentMethod: 'pix'
+      }
+    | {
+        paymentMethod: 'credit_card'
+        creditCardData: CreditCardData
+      }
+  )
 }
 
 export const createOrder = async ({
@@ -299,36 +311,40 @@ export const createOrder = async ({
     throw new Error('Customer response not found.')
   }
 
-  console.log('creating payment for order...')
-  const paymentResponse = await createPixQRCode({
+  const { paymentMethod } = paymentData || ''
+  console.log(
+    `creating payment for order using the payment method: ${paymentData.paymentMethod}...`
+  )
+  const commonParams = {
     customer: customerResponse.id,
     value: paymentData.totalAmount,
     dueDate: addMonths(new Date(), 6).toISOString(),
-  })
-  console.log('payment created successfully.')
-
-  if (!paymentResponse || !paymentResponse?.billing?.id) {
-    console.error('payment response missing billing id:', paymentResponse)
-    throw new Error('Payment response not found.')
   }
 
-  if (!paymentResponse.pix) {
-    console.error('pix data missing in the response:', paymentResponse)
-    throw new Error('Pix data not found in payment response')
-  }
+  let paymentResponse: { billing: Billing; pix?: PixQRCode }
+  if (paymentData.paymentMethod === 'pix') {
+    paymentResponse = await createPixQRCode({
+      ...commonParams,
+    })
 
-  const { payload: copyPasteCode, encodedImage: qrCodeBase64 } =
-    (paymentResponse.pix as unknown as {
-      payload: string
-      encodedImage: string
-    }) || {
-      payload: '',
-      encodedImage: '',
+    if (!paymentResponse.pix) {
+      console.error('pix data missing in the response:', paymentResponse)
+      throw new Error('Pix data not found in payment response')
     }
-
-  if (!qrCodeBase64) {
-    console.error('qr code missing in the response:', paymentResponse)
-    throw new Error('QR Code not found in payment response.')
+  } else if (paymentMethod === 'credit_card') {
+    paymentResponse = await createCreditCardPayment({
+      ...commonParams,
+      userData: {
+        cep: userData.address.cep || '',
+        phone: userData.phone || '',
+        email: userData.email || '',
+        addressNumber: userData.address.number || '',
+        addressComplement: 'Complemento',
+      },
+      creditCardData: paymentData.creditCardData,
+    })
+  } else {
+    throw new Error('Invalid payment method.')
   }
 
   console.log('creating new order...')
@@ -337,11 +353,13 @@ export const createOrder = async ({
     ecommerceId,
     items: cart.items,
     paymentData: {
-      id: paymentResponse.billing.id,
-      type: 'pix', // TOOD: Integrate other payment types
+      id: paymentResponse?.billing?.id,
+      type: paymentData.paymentMethod,
       totalAmount: paymentData.totalAmount,
-      qrCode: qrCodeBase64,
-      pixCode: copyPasteCode,
+      ...(paymentMethod === 'pix' && {
+        qrCode: paymentResponse?.pix?.encodedImage,
+        pixCode: paymentResponse?.pix?.payload,
+      }),
     },
     status: 'pending',
   })
