@@ -41,6 +41,8 @@ import {
   createPixQRCode,
   ICreatePixQRCode,
 } from './services/asaas'
+import multer from 'multer'
+import { uploadImage } from './services/imgur'
 
 dotenv.config()
 
@@ -49,6 +51,10 @@ const port: number = 4000
 app.use(cors({ origin: '*' }))
 app.options('*', cors())
 app.use(express.json())
+
+const upload = multer({
+  limits: { fileSize: 10 * 1024 * 1024 },
+})
 
 const mongoUsername = process.env.MONGO_USERNAME
 const mongoPassword = process.env.MONGO_PASSWORD
@@ -477,7 +483,6 @@ app.post('/whitelabel', async (req, res: Response): Promise<void> => {
       productTypes,
       socialMedia,
       pixKey,
-      paymentData,
     } = req.body
 
     if (!baseUrl || !name) {
@@ -650,6 +655,34 @@ app.post(
     }
   }
 )
+
+app.post('/upload-image', upload.single('image'), async (req, res) => {
+  try {
+    const file = req.file
+    console.log('File received:', file)
+
+    if (!file) {
+      return res.status(400).send({
+        error: 'Invalid request, image file is required.',
+        code: 'invalid_request',
+      })
+    }
+
+    const response = await uploadImage({ file })
+
+    res.setHeader('Content-Type', 'application/json; charset=utf-8')
+    res.status(200).json({
+      message: 'File uploaded successfully!',
+      data: response?.data || response,
+    })
+  } catch (e) {
+    console.error(e)
+    res.status(500).send({
+      error: 'Error to upload the image.',
+      code: 'error',
+    })
+  }
+})
 
 app.listen(port, (): void => {
   console.log(`Cloudmerce API running on port: ${port}`)
