@@ -42,7 +42,7 @@ import {
   ICreatePixQRCode,
 } from './services/asaas'
 import multer from 'multer'
-import { uploadImage } from './services/imgur'
+import { uploadImageImgBB } from './services/imgbb'
 
 dotenv.config()
 
@@ -668,7 +668,7 @@ app.post('/upload-image', upload.single('image'), async (req, res) => {
       })
     }
 
-    const response = await uploadImage({ file })
+    const response = await uploadImageImgBB({ file })
 
     res.setHeader('Content-Type', 'application/json; charset=utf-8')
     res.status(200).json({

@@ -5,16 +5,16 @@ import { Readable } from 'stream'
 
 dotenv.config()
 
-const clientId = process.env.IMGUR_CLIENT_ID || ''
+const apiKey = process.env.IMGBB_API_KEY || ''
 
-export const uploadImageImgur = async ({
+export const uploadImageImgBB = async ({
   file,
 }: {
   file: Express.Multer.File
 }): Promise<any> => {
-  console.log('uploading image to imgur...')
-  if (!clientId) {
-    throw new Error('Imgur client ID not found.')
+  console.log('uploading image to ImgBB...')
+  if (!apiKey) {
+    throw new Error('ImgBB API key not found.')
   }
 
   const formData = new FormData()
@@ -26,13 +26,11 @@ export const uploadImageImgur = async ({
 
   formData.append('image', bufferStream, file.originalname)
 
-  const response = await fetch('https://api.imgur.com/3/image', {
+  const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
     method: 'POST',
-    headers: {
-      Authorization: `Client-ID ${clientId}`,
-    },
     body: formData,
   })
+  console.log('response:', response)
 
   if (!response.ok) {
     throw new Error(`Failed to upload image: ${response.statusText}`)
@@ -40,6 +38,6 @@ export const uploadImageImgur = async ({
 
   const data = await response.json()
 
-  console.log('image uploaded successfully, link:', data)
-  return data
+  console.log('image uploaded successfully, link:', data.data.url)
+  return data.data
 }
