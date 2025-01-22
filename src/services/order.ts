@@ -49,6 +49,9 @@ export const getOrders = async ({
 }: IGetOrders) => {
   console.log('consulting orders with ecommerce id:', ecommerceId)
 
+  const totalOrders = await Order.countDocuments({ ecommerceId })
+  const totalPages = Math.ceil(totalOrders / pageSize)
+
   const orders = await Order.find({
     ecommerceId,
   })
@@ -60,7 +63,13 @@ export const getOrders = async ({
     console.log(`No orders found to ecommerceId ${ecommerceId}`)
   }
 
-  return orders || []
+  return (
+    {
+      orders,
+      totalOrders,
+      totalPages,
+    } || []
+  )
 }
 
 interface IGetOrdersByUserId {

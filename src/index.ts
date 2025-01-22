@@ -478,8 +478,8 @@ app.get(
       const { ecommerceId } = req.params
       const { page, pageSize } = req.query
       const response = await getOrders({
-        page,
-        pageSize,
+        page: Number(page),
+        pageSize: Number(pageSize),
         ecommerceId,
       })
       res.status(200).send(response)
