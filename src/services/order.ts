@@ -36,6 +36,33 @@ export const getOrderById = async ({ orderId, ecommerceId }: IGetOrderById) => {
   return order
 }
 
+interface IGetOrders {
+  page: number
+  pageSize: number
+  ecommerceId: string
+}
+
+export const getOrders = async ({
+  page,
+  pageSize,
+  ecommerceId,
+}: IGetOrders) => {
+  console.log('consulting orders with ecommerce id:', ecommerceId)
+
+  const orders = await Order.find({
+    ecommerceId,
+  })
+    .populate('items.productId')
+    .limit(pageSize)
+    .skip(pageSize * (page - 1))
+
+  if (!orders || orders.length === 0) {
+    console.log(`No orders found to ecommerceId ${ecommerceId}`)
+  }
+
+  return orders || []
+}
+
 interface IGetOrdersByUserId {
   userId: string
   ecommerceId: string
@@ -45,16 +72,14 @@ export const getOrdersByUserId = async ({
   userId,
   ecommerceId,
 }: IGetOrdersByUserId) => {
-  console.log('Valor do userId:', userId)
-
   if (!mongoose.Types.ObjectId.isValid(userId)) {
-    throw new Error('userId inválido')
+    throw new Error('invalid userId')
   }
 
   const objectIdUser = new mongoose.Types.ObjectId(userId)
 
   console.log(
-    'Consultando pedidos com userId:',
+    'consulting orders with object user id:',
     objectIdUser,
     'ecommerceId:',
     ecommerceId
@@ -66,7 +91,9 @@ export const getOrdersByUserId = async ({
   }).populate('items.productId')
 
   if (!orders || orders.length === 0) {
-    console.log('Nenhum pedido encontrado para esse userId e ecommerceId')
+    console.log(
+      `No orders found to the user ${userId} and ecommerceId ${ecommerceId}`
+    )
   }
 
   return orders || []

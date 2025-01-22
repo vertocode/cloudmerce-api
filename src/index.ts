@@ -26,6 +26,7 @@ import { setUserData } from './services/checkout'
 import {
   changeOrderStatus,
   getOrderById,
+  getOrders,
   getOrdersByUserId,
 } from './services/order'
 import { IWhitelabel } from './types/Whitelabel'
@@ -469,6 +470,25 @@ app.get('/orders/:ecommerceId', async (req, res: Response): Promise<void> => {
     res.status(500).send({ error: 'Erro ao buscar o pedido.', code: 'error' })
   }
 })
+
+app.get(
+  '/orders-admin/:ecommerceId',
+  async (req, res: Response): Promise<void> => {
+    try {
+      const { ecommerceId } = req.params
+      const { page, pageSize } = req.query
+      const response = await getOrders({
+        page,
+        pageSize,
+        ecommerceId,
+      })
+      res.status(200).send(response)
+    } catch (err) {
+      console.error(err)
+      res.status(500).send({ error: 'Erro ao buscar o pedido.', code: 'error' })
+    }
+  }
+)
 
 app.post('/whitelabel', async (req, res: Response): Promise<void> => {
   try {
